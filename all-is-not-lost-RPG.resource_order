@@ -1,0 +1,21 @@
+{
+  "FolderOrderSettings":[],
+  "ResourceOrderSettings":[
+    {"name":"oBackgroundController","order":1,"path":"objects/oBackgroundController/oBackgroundController.yy",},
+    {"name":"oPlayer","order":4,"path":"objects/oPlayer/oPlayer.yy",},
+    {"name":"playerStateFrozen","order":1,"path":"scripts/playerStateFrozen/playerStateFrozen.yy",},
+    {"name":"main_platform","order":6,"path":"sprites/main_platform/main_platform.yy",},
+    {"name":"sBackgroundClouds","order":1,"path":"sprites/sBackgroundClouds/sBackgroundClouds.yy",},
+    {"name":"sBackgroundMountain_1","order":3,"path":"sprites/sBackgroundMountain_1/sBackgroundMountain_1.yy",},
+    {"name":"sBackgroundMountain_2","order":4,"path":"sprites/sBackgroundMountain_2/sBackgroundMountain_2.yy",},
+    {"name":"sBackgroundMountain","order":2,"path":"sprites/sBackgroundMountain/sBackgroundMountain.yy",},
+    {"name":"sGrass","order":2,"path":"sprites/sGrass/sGrass.yy",},
+    {"name":"sPlayerAir","order":1,"path":"sprites/sPlayerAir/sPlayerAir.yy",},
+    {"name":"sPlayerFrozen","order":6,"path":"sprites/sPlayerFrozen/sPlayerFrozen.yy",},
+    {"name":"sPlayerLadder","order":3,"path":"sprites/sPlayerLadder/sPlayerLadder.yy",},
+    {"name":"sPlayerRunning","order":4,"path":"sprites/sPlayerRunning/sPlayerRunning.yy",},
+    {"name":"sRoomOneVanity","order":2,"path":"sprites/sRoomOneVanity/sRoomOneVanity.yy",},
+    {"name":"sTreeSmallDecorative","order":1,"path":"sprites/sTreeSmallDecorative/sTreeSmallDecorative.yy",},
+    {"name":"sWall","order":1,"path":"sprites/sWall/sWall.yy",},
+  ],
+}
