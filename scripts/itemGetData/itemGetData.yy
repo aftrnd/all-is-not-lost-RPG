@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"itemGetData",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"itemGetData",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

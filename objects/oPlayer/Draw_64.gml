@@ -36,8 +36,30 @@ if(drawDebugMenu = true)
 	
 }
 
-	// BUILD VERSION
-	draw_set_halign(fa_right);
-	draw_set_valign(fa_bottom);
-	draw_set_colour(c_white); 
-	draw_text(global.window_width -20, global.window_height - 10, "0.4.0 Pre-Alpha");
+// HOT BAR
+var slot_w = 64;
+var slot_h = 32;
+var padding = 4;
+
+for (var i = 0; i < hotbar_size; i++) {
+    var x_pos = 32 + i * (slot_w + padding);
+    var y_pos = display_get_gui_height() - slot_h - 16;
+
+    draw_set_color(c_black);
+    draw_rectangle(x_pos, y_pos, x_pos + slot_w, y_pos + slot_h, false);
+
+    if (inventory[i] != noone) {
+    var item = inventory[i];
+    draw_set_color(c_white);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+
+    var center_x = x_pos + slot_w / 2;
+    var center_y = y_pos + slot_h / 2;
+
+    draw_text(center_x, center_y, item.name + " x" + string(item.count));
+
+    draw_set_halign(fa_left);   // Reset after use
+    draw_set_valign(fa_top);
+    }
+}

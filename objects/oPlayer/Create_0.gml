@@ -24,3 +24,11 @@ drawDebugMenu = false;
 // Testing player states
 spriteDefault = sPlayer;
 spriteFrozen = sPlayerFrozen;
+
+// INVENTORY
+hotbar_size = 5;
+inventory_size = 10;
+total_slots = hotbar_size + inventory_size;
+
+// Inventory array of item structs or noone
+inventory = array_create(total_slots, noone);
