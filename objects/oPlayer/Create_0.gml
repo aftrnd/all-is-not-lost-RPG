@@ -32,3 +32,9 @@ inventory_size = 10;
 total_slots = hotbar_size + inventory_size;
 inventory = array_create(total_slots, noone);
 #endregion
+
+#region Inventory Management
+function inventory_add_item(item) {
+    return inventory_add_item(item);
+}
+#endregion

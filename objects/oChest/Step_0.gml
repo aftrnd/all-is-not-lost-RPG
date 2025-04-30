@@ -131,3 +131,49 @@ if (ui_open) {
     }
 }
 #endregion
+
+#region Mouse Right Click Transfer - Chest to Player
+if (ui_open && mouse_check_button_pressed(mb_right)) {
+    var slot_w = 64;
+    var slot_h = 32;
+    var padding = 4;
+    var chest_x = 64;
+    var chest_y = 64;
+
+    for (var i = 0; i < array_length(inventory); i++) {
+        var row = i div 5;
+        var col = i mod 5;
+
+        var x_pos = chest_x + col * (slot_w + padding);
+        var y_pos = chest_y + row * (slot_h + padding);
+
+        var mx = device_mouse_x_to_gui(0);
+        var my = device_mouse_y_to_gui(0);
+
+        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h)) {
+            var item = inventory[i];
+
+            if (item != noone) {
+                // Right click, move 1 item
+                var single_item = item_create(item.name, 1); // include .data!
+                
+                var added = oPlayer.inventory_add_item(single_item); // Assuming a similar function exists for player
+                
+                if (added) {
+                    item.count -= 1;
+                    
+                    if (item.count <= 0) {
+                        inventory[i] = noone;
+                    } else {
+                        inventory[i] = item;
+                    }
+                    
+                    show_debug_message("Moved 1 " + item.name + " to player");
+                } else {
+                    show_debug_message("Player inventory full for single item");
+                }
+            }
+        }
+    }
+}
+#endregion
