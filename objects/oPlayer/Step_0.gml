@@ -14,21 +14,8 @@ var my = device_mouse_y_to_gui(0);
 var shift_pressed = keyboard_check(vk_shift);
 
 if (mouse_check_button_pressed(mb_left)) {
-    if (shift_pressed) {
-        // Shift + Left Click: Move full stack or single item
-        for (var i = 0; i < array_length(inventory); i++) {
-            var slot_x = 32 + (i mod hotbar_size) * (slot_w + padding);
-            var slot_y = display_get_gui_height() - slot_h - 16;
-            if (point_in_rectangle(mx, my, slot_x, slot_y, slot_x + slot_w, slot_y + slot_h)) {
-                if (inventory[i] != noone) {
-                    // Call transfer_item_from only when shift is pressed
-                    transfer_item_from(oPlayer, oChest, i);
-                    break;
-                }
-            }
-        }
-    } else if (dragging_item == noone) {
-        // Regular Left Click: Start dragging
+    if (dragging_item == noone) {
+        // Start dragging
         for (var i = 0; i < array_length(inventory); i++) {
             var slot_x = 32 + (i mod hotbar_size) * (slot_w + padding);
             var slot_y = display_get_gui_height() - slot_h - 16;
@@ -43,10 +30,8 @@ if (mouse_check_button_pressed(mb_left)) {
                 }
             }
         }
-    }
-} else if (mouse_check_button_released(mb_left)) {
-    if (dragging_item != noone) {
-        // Drop item into chest UI or swap
+    } else {
+        // Drop item
         for (var i = 0; i < array_length(inventory); i++) {
             var slot_x = 32 + (i mod hotbar_size) * (slot_w + padding);
             var slot_y = display_get_gui_height() - slot_h - 16;
