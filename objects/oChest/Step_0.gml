@@ -81,8 +81,7 @@ if (ui_open && mouse_check_button_pressed(mb_left)) {
 #endregion
 
 #region Mouse Click Transfer - Player Hotbar to Chest
-// Mouse click transfer HOTBAR (left click)
-if (ui_open && mouse_check_button_pressed(mb_left)) {
+if (ui_open) {
     var mx = device_mouse_x_to_gui(0);
     var my = device_mouse_y_to_gui(0);
 
@@ -96,10 +95,37 @@ if (ui_open && mouse_check_button_pressed(mb_left)) {
         var y_pos = hotbar_y;
 
         if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h)) {
-            if (transfer_item_from(oPlayer, self, i)) {
-                show_debug_message("Clicked player hotbar slot " + string(i));
-            } else {
-                show_debug_message("Chest full or stacking failed..");
+            var item = oPlayer.inventory[i];
+
+            if (item != noone) {
+                if (mouse_check_button_pressed(mb_right)) {
+                    // Right click, move 1 item
+                    var single_item = item_create(item.name, 1); // include .data!
+                
+                    var added = inventory_add_item(single_item); // ✅ FIXED
+                
+                    if (added) {
+                        item.count -= 1;
+                
+                        if (item.count <= 0) {
+                            oPlayer.inventory[i] = noone;
+                        } else {
+                            oPlayer.inventory[i] = item;
+                        }
+                
+                        show_debug_message("Moved 1 " + item.name);
+                    } else {
+                        show_debug_message("Chest full for single item");
+                    }
+                }
+                else if (mouse_check_button_pressed(mb_left)) {
+                    // Left click, move full stack
+                    if (transfer_item_from(oPlayer, self, i)) {
+                        show_debug_message("Moved full stack from hotbar slot " + string(i));
+                    } else {
+                        show_debug_message("Chest full or stacking failed.");
+                    }
+                }
             }
         }
     }
