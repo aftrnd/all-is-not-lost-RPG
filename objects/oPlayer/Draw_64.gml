@@ -89,3 +89,17 @@ for (var i = 0; i < hotbar_size; i++) {
     }
 }
 #endregion
+
+#region Dragged Item
+if (dragging_item != noone && is_struct(dragging_item)) {
+    draw_set_alpha(0.6); // Set alpha to 60%
+    draw_set_color(c_white); // Ensure text color is white
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    // Draw the item text at the mouse position
+    draw_text(mx, my, dragging_item.name + " x" + string(dragging_item.count));
+    draw_set_alpha(1); // Reset alpha after drawing
+    draw_set_halign(fa_left);   // Reset after use
+    draw_set_valign(fa_top);
+}
+#endregion

@@ -52,15 +52,18 @@ if (closing) {
 image_index = frame_pos;
 #endregion
 
+var shift_pressed = keyboard_check(vk_shift);
+
+var slot_w = 64;
+var slot_h = 32;
+var padding = 4;
+
+var chest_x = 64;
+var chest_y = 64;
+
 #region Mouse Click Transfer - Chest to Player
 // Mouse click transfer CHEST (left click)
-if (ui_open && mouse_check_button_pressed(mb_left)) {
-    var slot_w = 64;
-    var slot_h = 32;
-    var padding = 4;
-    var chest_x = 64;
-    var chest_y = 64;
-
+if (ui_open && (mouse_check_button_pressed(mb_left) || mouse_check_button_pressed(mb_right))) {
     for (var i = 0; i < array_length(inventory); i++) {
         var row = i div 5;
         var col = i mod 5;
@@ -72,8 +75,29 @@ if (ui_open && mouse_check_button_pressed(mb_left)) {
         var my = device_mouse_y_to_gui(0);
 
         if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h)) {
-            if (transfer_item_from(self, oPlayer, i)) {
-                show_debug_message("Clicked chest slot " + string(i));
+            if (shift_pressed && mouse_check_button_pressed(mb_left)) {
+                // Shift + Left Click: Move full stack
+                if (transfer_item_from(self, oPlayer, i)) {
+                    show_debug_message("Clicked chest slot " + string(i));
+                }
+            } else if (shift_pressed && mouse_check_button_pressed(mb_right)) {
+                // Shift + Right Click: Move single item
+                var item = inventory[i];
+                if (item != noone) {
+                    var single_item = item_create(item.name, 1);
+                    var added = oPlayer.inventory_add_item(single_item);
+                    if (added) {
+                        item.count -= 1;
+                        if (item.count <= 0) {
+                            inventory[i] = noone;
+                        } else {
+                            inventory[i] = item;
+                        }
+                        show_debug_message("Moved 1 " + item.name + " to player");
+                    } else {
+                        show_debug_message("Player inventory full for single item");
+                    }
+                }
             }
         }
     }
@@ -98,32 +122,31 @@ if (ui_open) {
             var item = oPlayer.inventory[i];
 
             if (item != noone) {
-                if (mouse_check_button_pressed(mb_right)) {
-                    // Right click, move 1 item
+                if (shift_pressed && mouse_check_button_pressed(mb_left)) {
+                    // Shift + Left Click, move full stack
+                    if (transfer_item_from(oPlayer, self, i)) {
+                        show_debug_message("Moved full stack from hotbar slot " + string(i));
+                    } else {
+                        show_debug_message("Chest full or stacking failed.");
+                    }
+                } else if (shift_pressed && mouse_check_button_pressed(mb_right)) {
+                    // Shift + Right Click, move 1 item
                     var single_item = item_create(item.name, 1); // include .data!
-                
+                    
                     var added = inventory_add_item(single_item); // ✅ FIXED
-                
+                    
                     if (added) {
                         item.count -= 1;
-                
+                        
                         if (item.count <= 0) {
                             oPlayer.inventory[i] = noone;
                         } else {
                             oPlayer.inventory[i] = item;
                         }
-                
+                        
                         show_debug_message("Moved 1 " + item.name);
                     } else {
                         show_debug_message("Chest full for single item");
-                    }
-                }
-                else if (mouse_check_button_pressed(mb_left)) {
-                    // Left click, move full stack
-                    if (transfer_item_from(oPlayer, self, i)) {
-                        show_debug_message("Moved full stack from hotbar slot " + string(i));
-                    } else {
-                        show_debug_message("Chest full or stacking failed.");
                     }
                 }
             }

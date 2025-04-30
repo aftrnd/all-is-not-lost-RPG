@@ -38,3 +38,14 @@ function inventory_add_item(item) {
     return inventory_add_item(item);
 }
 #endregion
+
+#region Drag and Drop Variables
+dragging_item = noone;
+drag_origin_index = -1;
+drag_offset_x = 0;
+drag_offset_y = 0;
+#endregion
+
+slot_w = 64;
+slot_h = 32;
+padding = 4;
