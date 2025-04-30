@@ -1,3 +1,6 @@
+/// @desc oSign - Step Event
+
+#region Player Interaction
 if (place_meeting(x, y, oPlayer)) {
     // Player is touching the sign
     if (keyboard_check_pressed(vk_enter)) {
@@ -26,20 +29,24 @@ if (place_meeting(x, y, oPlayer)) {
     }
 }
 else {
-    // Player is no longer touching the sign
+    // Player walked away from the sign
     if (show_textbox) {
         show_textbox = false;
     }
 }
+#endregion
 
-// Typing effect
+#region Typing Effect
 if (show_textbox) {
     text_timer += 1;
+
     if (text_timer >= text_speed) {
         text_timer = 0;
+
         if (char_index < string_length(text_full)) {
             char_index += 1;
             text_displayed = string_copy(text_full, 1, char_index);
         }
     }
 }
+#endregion

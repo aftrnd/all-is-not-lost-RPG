@@ -1,5 +1,7 @@
-// oChest - Create Event
+/// @desc oChest - Create Event
+// You can write your code in this editor
 
+#region Variables
 is_open = false;      // is the chest open?
 ui_open = false;      // is the inventory UI open?
 opening = false;      // are we currently opening?
@@ -10,3 +12,4 @@ open_distance = 25;   // how close player must be to open
 inventory_size = 15; // max chest size
 inventory = array_create(inventory_size, noone);
 ui_open = false; // whether UI is currently shown
+#endregion

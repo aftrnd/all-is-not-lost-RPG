@@ -1,34 +1,34 @@
-/// @desc Player Properties
-// Sets the current state of the player
-state = playerStateDefault;
+/// @desc oPlayer - Properties
+// You can write your code in this editor
 
-playerGravity = 0.25; // Global value for player's gravity. Higher is more gravity (Might make a global value)
-
-// Player's current variables
-horizontalSpeed = 0; // Current horizontal speed
-verticalSpeed = 0; // Current vertical speed
-
-// Player Properties
-walkingSpeed = 1.45; // Speed the player walks
-jumpSpeed = -5.0; // Speed the player moves off the ground
-
-allowJump = 0; // Jump frame buffer
-
-// Player's current coordinates (currently for debug ONLY)
+#region Variables
+// Player's Coordinates 
 playerX = 0;
 playerY = 0;
 
-// Debug menu
+// Developer Menu
 drawDebugMenu = false;
 
-// Testing player states
+// Player States
 spriteDefault = sPlayer;
 spriteFrozen = sPlayerFrozen;
 
-// INVENTORY
+// Define initial state
+state = playerStateDefault;
+#endregion
+
+#region Properties
+playerGravity = 0.25; // Global value for player's gravity. Higher is more gravity (Might make a global value)
+horizontalSpeed = 0; // Current horizontal speed
+verticalSpeed = 0; // Current vertical speed
+walkingSpeed = 1.45; // Speed the player walks
+jumpSpeed = -5.0; // Speed the player moves off the ground
+allowJump = 0; // Jump frame buffer
+#endregion
+
+#region Hotbar & Player Inventory
 hotbar_size = 5;
 inventory_size = 10;
 total_slots = hotbar_size + inventory_size;
-
-// Inventory array of item structs or noone
 inventory = array_create(total_slots, noone);
+#endregion

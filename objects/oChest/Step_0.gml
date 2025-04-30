@@ -1,5 +1,7 @@
-// oChest - Step Event
+/// @desc oChest - Step Event
+// You can write your code in this editor
 
+#region Chest Open/Close Logic
 // Chest proximity and UI open/close
 var player_near = (point_distance(x, y, oPlayer.x, oPlayer.y) <= open_distance);
 
@@ -22,7 +24,9 @@ if (player_near) {
         ui_open = false;
     }
 }
+#endregion
 
+#region Chest Animation Handling
 // Animate chest frames
 if (opening) {
     frame_pos += frame_speed;
@@ -41,10 +45,14 @@ if (closing) {
         is_open = false;
     }
 }
+#endregion
 
+#region Sprite Frame Update
 // Update sprite frame
 image_index = frame_pos;
+#endregion
 
+#region Mouse Click Transfer - Chest to Player
 // Mouse click transfer CHEST (left click)
 if (ui_open && mouse_check_button_pressed(mb_left)) {
     var slot_w = 64;
@@ -70,7 +78,9 @@ if (ui_open && mouse_check_button_pressed(mb_left)) {
         }
     }
 }
+#endregion
 
+#region Mouse Click Transfer - Player Hotbar to Chest
 // Mouse click transfer HOTBAR (left click)
 if (ui_open && mouse_check_button_pressed(mb_left)) {
     var mx = device_mouse_x_to_gui(0);
@@ -94,3 +104,4 @@ if (ui_open && mouse_check_button_pressed(mb_left)) {
         }
     }
 }
+#endregion

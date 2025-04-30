@@ -50,7 +50,7 @@
     {"id":{"name":"oSign","path":"objects/oSign/oSign.yy",},},
     {"id":{"name":"oSword","path":"objects/oSword/oSword.yy",},},
     {"id":{"name":"oWall","path":"objects/oWall/oWall.yy",},},
-    {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"id":{"name":"TestRoom","path":"rooms/TestRoom/TestRoom.yy",},},
     {"id":{"name":"chestAdd","path":"scripts/chestAdd/chestAdd.yy",},},
     {"id":{"name":"chestTransfer","path":"scripts/chestTransfer/chestTransfer.yy",},},
     {"id":{"name":"inventoryAdd","path":"scripts/inventoryAdd/inventoryAdd.yy",},},
@@ -84,7 +84,7 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"roomId":{"name":"TestRoom","path":"rooms/TestRoom/TestRoom.yy",},},
   ],
   "templateType":null,
   "TextureGroups":[
