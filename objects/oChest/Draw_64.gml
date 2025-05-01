@@ -111,12 +111,19 @@ if (ui_open) {
         if (inventory[i] != noone) {
             var item = inventory[i];
             var icon = item.data.icon;
-            // Calculate scaling to fit slot
+            
+            // Get sprite dimensions
             var spr_w = sprite_get_width(icon);
             var spr_h = sprite_get_height(icon);
-            var scale = min((slot_size - padding) / max(spr_w, spr_h), (slot_size - padding) / max(spr_w, spr_h));
-            var icon_x = x_pos + (slot_size - spr_w * scale) / 2;
-            var icon_y = y_pos + (slot_size - spr_h * scale) / 2;
+            
+            // Calculate integer scaling factor for pixel-perfect rendering
+            var scale = floor((slot_size - padding) / max(spr_w, spr_h));
+            
+            // Center the sprite in the slot
+            var icon_x = x_pos + floor((slot_size - spr_w * scale) / 2);
+            var icon_y = y_pos + floor((slot_size - spr_h * scale) / 2);
+            
+            // Draw with pixel-perfect alignment
             draw_sprite_ext(icon, 0, icon_x, icon_y, scale, scale, 0, c_white, 1);
 
             // Draw count in bottom right with shadow for better readability
@@ -141,12 +148,19 @@ if (ui_open) {
         var my = device_mouse_y_to_gui(0);
         var item = dragging_item;
         var icon = item.data.icon;
-        // Calculate scaling to fit slot under mouse
+        
+        // Get sprite dimensions
         var spr_w = sprite_get_width(icon);
         var spr_h = sprite_get_height(icon);
-        var scale = min((slot_size - padding) / max(spr_w, spr_h), (slot_size - padding) / max(spr_w, spr_h));
-        var draw_x = mx - (spr_w * scale / 2);
-        var draw_y = my - (spr_h * scale / 2);
+        
+        // Calculate integer scaling factor for pixel-perfect rendering
+        var scale = floor((slot_size - padding) / max(spr_w, spr_h));
+        
+        // Center the sprite under the mouse
+        var draw_x = mx - floor((spr_w * scale) / 2);
+        var draw_y = my - floor((spr_h * scale) / 2);
+        
+        // Draw with pixel-perfect alignment
         draw_sprite_ext(icon, 0, draw_x, draw_y, scale, scale, 0, c_white, 0.8);
 
         // Draw count with shadow for better visibility
