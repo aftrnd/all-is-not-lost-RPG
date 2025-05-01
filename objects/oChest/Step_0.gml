@@ -1,6 +1,17 @@
 /// @desc oChest - Step Event
 // You can write your code in this editor
 
+#region Variables
+var shift_pressed = keyboard_check(vk_shift);
+
+var slot_w = 64;
+var slot_h = 32;
+var padding = 4;
+
+var chest_x = 64;
+var chest_y = 64;
+#endregion
+
 #region Chest Open/Close Logic
 // Chest proximity and UI open/close
 var player_near = (point_distance(x, y, oPlayer.x, oPlayer.y) <= open_distance);
@@ -51,15 +62,6 @@ if (closing) {
 // Update sprite frame
 image_index = frame_pos;
 #endregion
-
-var shift_pressed = keyboard_check(vk_shift);
-
-var slot_w = 64;
-var slot_h = 32;
-var padding = 4;
-
-var chest_x = 64;
-var chest_y = 64;
 
 #region Mouse Click Transfer - Chest to Player
 // Mouse click transfer CHEST (left click)
