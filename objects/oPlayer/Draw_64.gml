@@ -17,6 +17,13 @@ var gui_height = display_get_gui_height();
 #region Debug Menu
 if(drawDebugMenu = true)
 {
+	// Store original drawing properties to restore later
+	var orig_font = draw_get_font();
+	var orig_halign = draw_get_halign();
+	var orig_valign = draw_get_valign();
+	var orig_color = draw_get_color();
+	var orig_alpha = draw_get_alpha();
+	
 	// Calculate debug menu height based on content
 	var debug_height = 120;  // Base height for initial content
 	var ui_height = 16 * 3;  // UI flags (inventory, chest, sign)
@@ -223,6 +230,13 @@ if(drawDebugMenu = true)
 			draw_text(debug_x + padding + 70, log_top + (i * 16), log_message);
 		}
 	}
+	
+	// Restore original drawing properties
+	draw_set_font(orig_font);
+	draw_set_halign(orig_halign);
+	draw_set_valign(orig_valign);
+	draw_set_color(orig_color);
+	draw_set_alpha(orig_alpha);
 }
 #endregion
 
@@ -335,7 +349,19 @@ if (inventory_open) {
 #endregion
 
 #region Hotbar
+// Save the drawing properties before drawing the hotbar
+var h_font = draw_get_font();
+var h_halign = draw_get_halign();
+var h_valign = draw_get_valign();
+var h_color = draw_get_color();
+var h_alpha = draw_get_alpha();
+
+// Reset to default values
 draw_set_font(fnt_body);
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+draw_set_color(c_white);
+draw_set_alpha(1.0);
 
 // Calculate hotbar dimensions
 var hotbar_width = (slot_size + padding) * hotbar_size - padding;
@@ -424,6 +450,13 @@ for (var i = 0; i < hotbar_size; i++) {
         draw_set_valign(fa_top);
     }
 }
+
+// Restore original drawing properties
+draw_set_font(h_font);
+draw_set_halign(h_halign);
+draw_set_valign(h_valign);
+draw_set_color(h_color);
+draw_set_alpha(h_alpha);
 #endregion
 
 #region Dragged Item
