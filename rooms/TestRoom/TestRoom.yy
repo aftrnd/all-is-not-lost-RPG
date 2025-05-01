@@ -84,6 +84,8 @@
     {"name":"inst_4DD66ABD","path":"rooms/TestRoom/TestRoom.yy",},
     {"name":"inst_4A5392DC","path":"rooms/TestRoom/TestRoom.yy",},
     {"name":"inst_4813ED34","path":"rooms/TestRoom/TestRoom.yy",},
+    {"name":"inst_2C0A29CF","path":"rooms/TestRoom/TestRoom.yy",},
+    {"name":"inst_265BDB77","path":"rooms/TestRoom/TestRoom.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -93,6 +95,7 @@
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oApple","path":"objects/oApple/oApple.yy",},"propertyId":{"name":"item_name","path":"objects/oApple/oApple.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"apple",},
           ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":960.0,"y":256.0,},
         {"$GMRInstance":"v2","%Name":"inst_4813ED34","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_4813ED34","objectId":{"name":"oApple","path":"objects/oApple/oApple.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":832.0,"y":352.0,},
+        {"$GMRInstance":"v2","%Name":"inst_2C0A29CF","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_2C0A29CF","objectId":{"name":"oSword","path":"objects/oSword/oSword.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":768.0,"y":416.0,},
       ],"layers":[],"name":"Player","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRInstanceLayer":"","%Name":"Instances","depth":100,"effectEnabled":true,"effectType":null,"gridX":8,"gridY":8,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[
         {"$GMRInstance":"v2","%Name":"inst_D991693","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_D991693","objectId":{"name":"oSign","path":"objects/oSign/oSign.yy",},"properties":[
@@ -105,6 +108,7 @@
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oSign","path":"objects/oSign/oSign.yy",},"propertyId":{"name":"text_id","path":"objects/oSign/oSign.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"greeting_02",},
           ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":800.0,"y":432.0,},
         {"$GMRInstance":"v2","%Name":"inst_4093560F","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_4093560F","objectId":{"name":"oChest","path":"objects/oChest/oChest.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":648.0,"y":464.0,},
+        {"$GMRInstance":"v2","%Name":"inst_265BDB77","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_265BDB77","objectId":{"name":"oChest","path":"objects/oChest/oChest.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":832.0,"y":432.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRAssetLayer":"","%Name":"Grass","assets":[
         {"$GMRSpriteGraphic":"v1","%Name":"graphic_5DB16F70","animationSpeed":1.0,"colour":4294967295,"frozen":false,"headPosition":0.0,"ignore":false,"inheritedItemId":null,"inheritItemSettings":false,"name":"graphic_5DB16F70","resourceType":"GMRSpriteGraphic","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"spriteId":{"name":"sGrass","path":"sprites/sGrass/sGrass.yy",},"x":160.0,"y":480.0,},

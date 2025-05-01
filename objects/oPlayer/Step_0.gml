@@ -1,6 +1,21 @@
 /// @desc oPlayer - Keyboard Input
 // You can write your code in this editor
 
+#region Variables
+var mx = device_mouse_x_to_gui(0);
+var my = device_mouse_y_to_gui(0);
+var shift_pressed = keyboard_check(vk_shift);
+
+// UI dimensions
+var slot_size = 48;
+var padding = 6;
+var gui_width = display_get_gui_width();
+var gui_height = display_get_gui_height();
+var hotbar_width = (slot_size + padding) * hotbar_size - padding;
+var hotbar_x = (gui_width - hotbar_width) / 2;
+var hotbar_y = gui_height - slot_size - 20;
+#endregion
+
 #region Keyboard Bindings
 keyRight = keyboard_check(vk_right);
 keyLeft = keyboard_check(vk_left);
@@ -19,12 +34,6 @@ for (var i = 0; i < hotbar_size; i++) {
 
 // Mouse click selection for hotbar
 if (mouse_check_button_pressed(mb_right)) {
-    var gui_width = display_get_gui_width();
-    var gui_height = display_get_gui_height();
-    var hotbar_width = (slot_size + padding) * hotbar_size - padding;
-    var hotbar_x = (gui_width - hotbar_width) / 2;
-    var hotbar_y = gui_height - slot_size - 20;
-    
     for (var i = 0; i < hotbar_size; i++) {
         var slot_x = hotbar_x + i * (slot_size + padding);
         var slot_y = hotbar_y;
@@ -38,19 +47,6 @@ if (mouse_check_button_pressed(mb_right)) {
 #endregion
 
 #region Drag and Drop Logic
-var mx = device_mouse_x_to_gui(0);
-var my = device_mouse_y_to_gui(0);
-var shift_pressed = keyboard_check(vk_shift);
-
-// Updated dimensions for new UI
-var slot_size = 48;
-var padding = 6;
-var gui_width = display_get_gui_width();
-var gui_height = display_get_gui_height();
-var hotbar_width = (slot_size + padding) * hotbar_size - padding;
-var hotbar_x = (gui_width - hotbar_width) / 2;
-var hotbar_y = gui_height - slot_size - 20;
-
 if (mouse_check_button_pressed(mb_left)) {
     if (dragging_item == noone) {
         // Start dragging
