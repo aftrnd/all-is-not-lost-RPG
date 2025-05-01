@@ -49,9 +49,10 @@ if(drawDebugMenu = true)
 #region Hotbar
 draw_set_font(fnt_body);
 
-var slot_size = 64; // Square slots
-var padding = 8;
+var slot_size = 48; // Smaller slots to match chest UI
+var padding = 6;
 var border = 2;
+var corner_radius = 8; // Consistent corner radius
 var gui_width = display_get_gui_width();
 var gui_height = display_get_gui_height();
 
@@ -63,22 +64,26 @@ var hotbar_y = gui_height - slot_size - 20;
 // Draw hotbar background
 draw_set_alpha(0.7);
 draw_set_color(c_black);
-draw_roundrect(
+draw_roundrect_ext(
     hotbar_x - padding,
     hotbar_y - padding,
     hotbar_x + hotbar_width + padding,
     hotbar_y + slot_size + padding,
+    corner_radius,
+    corner_radius,
     false
 );
 
 // Draw hotbar border
 draw_set_alpha(0.8);
 draw_set_color(c_dkgray);
-draw_roundrect(
+draw_roundrect_ext(
     hotbar_x - padding,
     hotbar_y - padding,
     hotbar_x + hotbar_width + padding,
     hotbar_y + slot_size + padding,
+    corner_radius,
+    corner_radius,
     true
 );
 draw_set_alpha(1);
@@ -93,7 +98,7 @@ for (var i = 0; i < hotbar_size; i++) {
     // Semi-transparent slot background
     draw_set_alpha(0.5);
     draw_set_color(c_black);
-    draw_roundrect(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, false);
+    draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
     
     // Slot border - white if selected or hovered
     draw_set_alpha(0.9);
@@ -102,13 +107,13 @@ for (var i = 0; i < hotbar_size; i++) {
     } else {
         draw_set_color(is_hovered ? c_white : c_dkgray);
     }
-    draw_roundrect(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, true);
+    draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, true);
     
     // Inner border when hovered or selected
-    if (is_hovered || is_selected) {
+    if (is_hovered && !is_selected) {
         draw_set_alpha(0.7);
-        draw_set_color(is_selected ? c_yellow : c_white);
-        draw_roundrect(x_pos + border, y_pos + border, x_pos + slot_size - border, y_pos + slot_size - border, true);
+        draw_set_color(c_white);
+        draw_roundrect_ext(x_pos + border, y_pos + border, x_pos + slot_size - border, y_pos + slot_size - border, corner_radius/2, corner_radius/2, true);
     }
     
     draw_set_alpha(1);
@@ -120,7 +125,7 @@ for (var i = 0; i < hotbar_size; i++) {
         // Calculate scaling to fit slot
         var spr_w = sprite_get_width(icon);
         var spr_h = sprite_get_height(icon);
-        var scale = min((slot_size - padding * 2) / max(spr_w, spr_h), (slot_size - padding * 2) / max(spr_w, spr_h));
+        var scale = min((slot_size - padding) / max(spr_w, spr_h), (slot_size - padding) / max(spr_w, spr_h));
         var icon_x = x_pos + (slot_size - spr_w * scale) / 2;
         var icon_y = y_pos + (slot_size - spr_h * scale) / 2;
         draw_sprite_ext(icon, 0, icon_x, icon_y, scale, scale, 0, c_white, 1);
@@ -129,10 +134,10 @@ for (var i = 0; i < hotbar_size; i++) {
         draw_set_color(c_black);
         draw_set_halign(fa_right);
         draw_set_valign(fa_bottom);
-        draw_text(x_pos + slot_size - padding + 1, y_pos + slot_size - padding + 1, string(item.count));
+        draw_text(x_pos + slot_size - padding/2 + 1, y_pos + slot_size - padding/2 + 1, string(item.count));
         
         draw_set_color(c_white);
-        draw_text(x_pos + slot_size - padding, y_pos + slot_size - padding, string(item.count));
+        draw_text(x_pos + slot_size - padding/2, y_pos + slot_size - padding/2, string(item.count));
 
         draw_set_halign(fa_left);   // Reset after use
         draw_set_valign(fa_top);
@@ -147,7 +152,7 @@ if (dragging_item != noone && is_struct(dragging_item)) {
     // Calculate scaling to fit slot under mouse
     var spr_w = sprite_get_width(icon);
     var spr_h = sprite_get_height(icon);
-    var scale = min((slot_size - padding * 2) / max(spr_w, spr_h), (slot_size - padding * 2) / max(spr_w, spr_h));
+    var scale = min((slot_size - padding) / max(spr_w, spr_h), (slot_size - padding) / max(spr_w, spr_h));
     var draw_x = mx - (spr_w * scale / 2);
     var draw_y = my - (spr_h * scale / 2);
     draw_sprite_ext(icon, 0, draw_x, draw_y, scale, scale, 0, c_white, 0.8);

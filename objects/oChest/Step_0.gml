@@ -5,8 +5,8 @@
 var shift_pressed = keyboard_check(vk_shift);
 
 // Update to match the dimensions in Draw_64.gml
-var slot_size = 64;
-var padding = 8;
+var slot_size = 48;
+var padding = 6;
 var border = 2;
 
 var chest_x = 64;

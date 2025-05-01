@@ -47,5 +47,5 @@ drag_offset_x = 0;
 drag_offset_y = 0;
 #endregion
 
-slot_size = 64;
-padding = 8;
+slot_size = 48;
+padding = 6;
