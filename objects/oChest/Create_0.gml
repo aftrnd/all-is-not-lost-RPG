@@ -12,4 +12,10 @@ open_distance = 25;   // how close player must be to open
 inventory_size = 15; // max chest size
 inventory = array_create(inventory_size, noone);
 ui_open = false; // whether UI is currently shown
+
+// Drag and Drop Variables
+dragging_item = noone;
+drag_origin_index = -1;
+drag_offset_x = 0;
+drag_offset_y = 0;
 #endregion

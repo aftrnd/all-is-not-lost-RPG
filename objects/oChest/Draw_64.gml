@@ -79,4 +79,20 @@ if (ui_open) {
         }
     }
     #endregion
+
+    #region Dragged Item
+    // Draw the item being dragged over the chest UI
+    if (dragging_item != noone && is_struct(dragging_item)) {
+        var mx = device_mouse_x_to_gui(0);
+        var my = device_mouse_y_to_gui(0);
+        draw_set_alpha(0.6);
+        draw_set_color(c_white);
+        draw_set_halign(fa_center);
+        draw_set_valign(fa_middle);
+        draw_text(mx, my, dragging_item.name + " x" + string(dragging_item.count));
+        draw_set_alpha(1);
+        draw_set_halign(fa_left);
+        draw_set_valign(fa_top);
+    }
+    #endregion
 }

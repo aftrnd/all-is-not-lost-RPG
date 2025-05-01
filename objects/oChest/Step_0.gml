@@ -200,3 +200,54 @@ if (ui_open && mouse_check_button_pressed(mb_right)) {
     }
 }
 #endregion
+
+#region Drag and Drop Logic
+// Handle dragging items within the chest inventory
+var mx = device_mouse_x_to_gui(0);
+var my = device_mouse_y_to_gui(0);
+if (ui_open && mouse_check_button_pressed(mb_left)) {
+    if (dragging_item == noone) {
+        // Start dragging from chest
+        for (var i = 0; i < array_length(inventory); i++) {
+            var row = i div 5;
+            var col = i mod 5;
+            var x_pos = chest_x + col * (slot_w + padding);
+            var y_pos = chest_y + row * (slot_h + padding);
+            if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h)) {
+                if (inventory[i] != noone) {
+                    dragging_item = inventory[i];
+                    drag_origin_index = i;
+                    drag_offset_x = mx - x_pos;
+                    drag_offset_y = my - y_pos;
+                    inventory[i] = noone;
+                    break;
+                }
+            }
+        }
+    } else {
+        // Drop or swap within chest
+        for (var i = 0; i < array_length(inventory); i++) {
+            var row = i div 5;
+            var col = i mod 5;
+            var x_pos = chest_x + col * (slot_w + padding);
+            var y_pos = chest_y + row * (slot_h + padding);
+            if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h)) {
+                if (inventory[i] == noone) {
+                    inventory[i] = dragging_item;
+                } else {
+                    var temp = inventory[i];
+                    inventory[i] = dragging_item;
+                    inventory[drag_origin_index] = temp;
+                }
+                dragging_item = noone;
+                break;
+            }
+        }
+        // If dropped outside valid slot, return to origin
+        if (dragging_item != noone) {
+            inventory[drag_origin_index] = dragging_item;
+            dragging_item = noone;
+        }
+    }
+}
+#endregion
