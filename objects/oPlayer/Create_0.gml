@@ -25,8 +25,13 @@ spriteFrozen = sPlayerFrozen;
 
 // Define initial state
 state = player_state_default;
+
+// Hot Bar
+slot_size = 48;
+padding = 6;
 #endregion
 
+#region Developer Menu
 /// @function debug_log(message, color)
 /// @description Adds a message to the debug log display
 /// @param {string} message The message to log
@@ -73,6 +78,7 @@ function debug_log(_message, _color = c_white) {
         sign_time = current_time;
     }
 }
+#endregion
 
 #region Properties
 playerGravity = 0.25; // Global value for player's gravity. Higher is more gravity (Might make a global value)
@@ -103,5 +109,3 @@ drag_offset_x = 0;
 drag_offset_y = 0;
 #endregion
 
-slot_size = 48;
-padding = 6;
