@@ -78,27 +78,284 @@ if (ui_open && (mouse_check_button_pressed(mb_left) || mouse_check_button_presse
         var my = device_mouse_y_to_gui(0);
 
         if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
-            if (shift_pressed && mouse_check_button_pressed(mb_left)) {
-                // Shift + Left Click: Move full stack
-                if (transfer_item_from(self, oPlayer, i)) {
-                    show_debug_message("Clicked chest slot " + string(i));
-                }
-            } else if (shift_pressed && mouse_check_button_pressed(mb_right)) {
-                // Shift + Right Click: Move single item
-                var item = inventory[i];
-                if (item != noone) {
-                    var single_item = item_create(item.name, 1);
-                    var added = oPlayer.inventory_add_item(single_item);
-                    if (added) {
-                        item.count -= 1;
-                        if (item.count <= 0) {
+            var chest_item = inventory[i];
+            
+            if (chest_item != noone) {
+                if (shift_pressed && mouse_check_button_pressed(mb_left)) {
+                    // ===== SHIFT + LEFT CLICK: MOVE FULL STACK =====
+                    var moved = false;
+                    
+                    // Try stacking in hotbar first
+                    for (var j = 0; j < oPlayer.hotbar_size; j++) {
+                        var hotbar_item = oPlayer.inventory[j];
+                        if (hotbar_item != noone && hotbar_item.name == chest_item.name) {
+                            // Found matching item in hotbar, stack them
+                            hotbar_item.count += chest_item.count;
                             inventory[i] = noone;
-                        } else {
-                            inventory[i] = item;
+                            moved = true;
+                            show_debug_message("Stacked full stack in hotbar slot " + string(j));
+                            break;
                         }
-                        show_debug_message("Moved 1 " + item.name + " to player");
-                    } else {
-                        show_debug_message("Player inventory full for single item");
+                    }
+                    
+                    // Try stacking in inventory if not moved and inventory is open
+                    if (!moved && oPlayer.inventory_open) {
+                        for (var j = 0; j < oPlayer.inventory_size; j++) {
+                            var inv_slot = oPlayer.hotbar_size + j;
+                            var inv_item = oPlayer.inventory[inv_slot];
+                            if (inv_item != noone && inv_item.name == chest_item.name) {
+                                // Found matching item in inventory, stack them
+                                inv_item.count += chest_item.count;
+                                inventory[i] = noone;
+                                moved = true;
+                                show_debug_message("Stacked full stack in inventory slot " + string(inv_slot));
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // If not stacked, find empty slot
+                    if (!moved) {
+                        // Try hotbar first
+                        for (var j = 0; j < oPlayer.hotbar_size; j++) {
+                            if (oPlayer.inventory[j] == noone) {
+                                // Found empty hotbar slot
+                                oPlayer.inventory[j] = item_create(chest_item.name, chest_item.count);
+                                inventory[i] = noone;
+                                moved = true;
+                                show_debug_message("Moved full stack to empty hotbar slot " + string(j));
+                                break;
+                            }
+                        }
+                        
+                        // Try inventory if not moved and inventory is open
+                        if (!moved && oPlayer.inventory_open) {
+                            for (var j = 0; j < oPlayer.inventory_size; j++) {
+                                var inv_slot = oPlayer.hotbar_size + j;
+                                if (oPlayer.inventory[inv_slot] == noone) {
+                                    // Found empty inventory slot
+                                    oPlayer.inventory[inv_slot] = item_create(chest_item.name, chest_item.count);
+                                    inventory[i] = noone;
+                                    moved = true;
+                                    show_debug_message("Moved full stack to empty inventory slot " + string(inv_slot));
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (!moved) {
+                            show_debug_message("No space in player inventory for full stack");
+                        }
+                    }
+                    
+                } else if (shift_pressed && mouse_check_button_pressed(mb_right)) {
+                    // ===== SHIFT + RIGHT CLICK: MOVE SINGLE ITEM =====
+                    var moved = false;
+                    
+                    // Try stacking in hotbar first
+                    for (var j = 0; j < oPlayer.hotbar_size; j++) {
+                        var hotbar_item = oPlayer.inventory[j];
+                        if (hotbar_item != noone && hotbar_item.name == chest_item.name) {
+                            // Need to check max stack size
+                            var max_stack = hotbar_item.data.max_stack;
+                            if (hotbar_item.count < max_stack) {
+                                // There's room in the stack
+                                hotbar_item.count += 1;
+                                chest_item.count -= 1;
+                                moved = true;
+                                
+                                // Remove chest item if emptied
+                                if (chest_item.count <= 0) {
+                                    inventory[i] = noone;
+                                }
+                                
+                                show_debug_message("Added single item to existing hotbar stack");
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Try stacking in inventory if not moved and inventory is open
+                    if (!moved && oPlayer.inventory_open) {
+                        for (var j = 0; j < oPlayer.inventory_size; j++) {
+                            var inv_slot = oPlayer.hotbar_size + j;
+                            var inv_item = oPlayer.inventory[inv_slot];
+                            if (inv_item != noone && inv_item.name == chest_item.name) {
+                                // Need to check max stack size
+                                var max_stack = inv_item.data.max_stack;
+                                if (inv_item.count < max_stack) {
+                                    // There's room in the stack
+                                    inv_item.count += 1;
+                                    chest_item.count -= 1;
+                                    moved = true;
+                                    
+                                    // Remove chest item if emptied
+                                    if (chest_item.count <= 0) {
+                                        inventory[i] = noone;
+                                    }
+                                    
+                                    show_debug_message("Added single item to existing inventory stack");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // If not stacked, find empty slot
+                    if (!moved) {
+                        // Try hotbar first
+                        for (var j = 0; j < oPlayer.hotbar_size; j++) {
+                            if (oPlayer.inventory[j] == noone) {
+                                // Found empty hotbar slot
+                                oPlayer.inventory[j] = item_create(chest_item.name, 1);
+                                chest_item.count -= 1;
+                                
+                                // Remove chest item if emptied
+                                if (chest_item.count <= 0) {
+                                    inventory[i] = noone;
+                                }
+                                
+                                moved = true;
+                                show_debug_message("Moved single item to empty hotbar slot " + string(j));
+                                break;
+                            }
+                        }
+                        
+                        // Try inventory if not moved and inventory is open
+                        if (!moved && oPlayer.inventory_open) {
+                            for (var j = 0; j < oPlayer.inventory_size; j++) {
+                                var inv_slot = oPlayer.hotbar_size + j;
+                                if (oPlayer.inventory[inv_slot] == noone) {
+                                    // Found empty inventory slot
+                                    oPlayer.inventory[inv_slot] = item_create(chest_item.name, 1);
+                                    chest_item.count -= 1;
+                                    
+                                    // Remove chest item if emptied
+                                    if (chest_item.count <= 0) {
+                                        inventory[i] = noone;
+                                    }
+                                    
+                                    moved = true;
+                                    show_debug_message("Moved single item to empty inventory slot " + string(inv_slot));
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (!moved) {
+                            show_debug_message("No space in player inventory for single item");
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+#endregion
+
+#region Mouse Click Transfer - Player Hotbar to Chest
+if (ui_open) {
+    var mx = device_mouse_x_to_gui(0);
+    var my = device_mouse_y_to_gui(0);
+    
+    var gui_width = display_get_gui_width();
+    var gui_height = display_get_gui_height();
+    
+    var hotbar_width = (slot_size + padding) * oPlayer.hotbar_size - padding;
+    var hotbar_x = (gui_width - hotbar_width) / 2; // Center hotbar
+    var hotbar_y = gui_height - slot_size - 20;
+
+    for (var i = 0; i < oPlayer.hotbar_size; i++) {
+        var x_pos = hotbar_x + i * (slot_size + padding);
+        var y_pos = hotbar_y;
+
+        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
+            var hotbar_item = oPlayer.inventory[i];
+
+            if (hotbar_item != noone) {
+                if (shift_pressed && mouse_check_button_pressed(mb_left)) {
+                    // ===== SHIFT + LEFT CLICK: MOVE FULL STACK =====
+                    var moved = false;
+                    
+                    // Try stacking in chest
+                    for (var j = 0; j < array_length(inventory); j++) {
+                        var chest_item = inventory[j];
+                        if (chest_item != noone && chest_item.name == hotbar_item.name) {
+                            // Found matching item in chest, stack them
+                            chest_item.count += hotbar_item.count;
+                            oPlayer.inventory[i] = noone;
+                            moved = true;
+                            show_debug_message("Moved full stack from hotbar to chest slot " + string(j));
+                            break;
+                        }
+                    }
+                    
+                    // If not stacked, find empty slot
+                    if (!moved) {
+                        for (var j = 0; j < array_length(inventory); j++) {
+                            if (inventory[j] == noone) {
+                                // Found empty chest slot
+                                inventory[j] = item_create(hotbar_item.name, hotbar_item.count);
+                                oPlayer.inventory[i] = noone;
+                                moved = true;
+                                show_debug_message("Moved full stack to empty chest slot " + string(j));
+                                break;
+                            }
+                        }
+                        
+                        if (!moved) {
+                            show_debug_message("Chest full - could not move full stack");
+                        }
+                    }
+                } else if (shift_pressed && mouse_check_button_pressed(mb_right)) {
+                    // ===== SHIFT + RIGHT CLICK: MOVE SINGLE ITEM =====
+                    var moved = false;
+                    
+                    // Try stacking in chest
+                    for (var j = 0; j < array_length(inventory); j++) {
+                        var chest_item = inventory[j];
+                        if (chest_item != noone && chest_item.name == hotbar_item.name) {
+                            // Need to check max stack size
+                            var max_stack = chest_item.data.max_stack;
+                            if (chest_item.count < max_stack) {
+                                // There's room in the stack
+                                chest_item.count += 1;
+                                hotbar_item.count -= 1;
+                                moved = true;
+                                
+                                // Remove hotbar item if emptied
+                                if (hotbar_item.count <= 0) {
+                                    oPlayer.inventory[i] = noone;
+                                }
+                                
+                                show_debug_message("Added single item to existing chest stack");
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // If not stacked, find empty slot
+                    if (!moved) {
+                        for (var j = 0; j < array_length(inventory); j++) {
+                            if (inventory[j] == noone) {
+                                // Found empty chest slot
+                                inventory[j] = item_create(hotbar_item.name, 1);
+                                hotbar_item.count -= 1;
+                                
+                                // Remove hotbar item if emptied
+                                if (hotbar_item.count <= 0) {
+                                    oPlayer.inventory[i] = noone;
+                                }
+                                
+                                moved = true;
+                                show_debug_message("Moved single item to empty chest slot " + string(j));
+                                break;
+                            }
+                        }
+                        
+                        if (!moved) {
+                            show_debug_message("Chest full - could not move single item");
+                        }
                     }
                 }
             }
@@ -131,75 +388,93 @@ if (ui_open && oPlayer.inventory_open) {
         var slot_index = oPlayer.hotbar_size + i;
         
         if (point_in_rectangle(mx, my, slot_x, slot_y, slot_x + slot_size, slot_y + slot_size)) {
-            var item = oPlayer.inventory[slot_index];
+            var inv_item = oPlayer.inventory[slot_index];
             
-            if (item != noone) {
+            if (inv_item != noone) {
                 if (shift_pressed && mouse_check_button_pressed(mb_left)) {
-                    // Shift + Left Click, move full stack
-                    if (transfer_item_from(oPlayer, self, slot_index)) {
-                        show_debug_message("Moved full stack from inventory slot " + string(slot_index));
-                    } else {
-                        show_debug_message("Chest full or stacking failed.");
-                    }
-                } else if (shift_pressed && mouse_check_button_pressed(mb_right)) {
-                    // Shift + Right Click, move 1 item
-                    var single_item = item_create(item.name, 1);
+                    // ===== SHIFT + LEFT CLICK: MOVE FULL STACK =====
+                    var moved = false;
                     
-                    var added = inventory_add_item(single_item);
-                    
-                    if (added) {
-                        item.count -= 1;
-                        
-                        if (item.count <= 0) {
+                    // Try stacking in chest
+                    for (var j = 0; j < array_length(inventory); j++) {
+                        var chest_item = inventory[j];
+                        if (chest_item != noone && chest_item.name == inv_item.name) {
+                            // Found matching item in chest, stack them
+                            chest_item.count += inv_item.count;
                             oPlayer.inventory[slot_index] = noone;
-                        } else {
-                            oPlayer.inventory[slot_index] = item;
+                            moved = true;
+                            show_debug_message("Moved full stack from inventory to chest slot " + string(j));
+                            break;
+                        }
+                    }
+                    
+                    // If not stacked, find empty slot
+                    if (!moved) {
+                        for (var j = 0; j < array_length(inventory); j++) {
+                            if (inventory[j] == noone) {
+                                // Found empty chest slot
+                                inventory[j] = item_create(inv_item.name, inv_item.count);
+                                oPlayer.inventory[slot_index] = noone;
+                                moved = true;
+                                show_debug_message("Moved full stack to empty chest slot " + string(j));
+                                break;
+                            }
                         }
                         
-                        show_debug_message("Moved 1 " + item.name + " from inventory to chest");
-                    } else {
-                        show_debug_message("Chest full for single item");
+                        if (!moved) {
+                            show_debug_message("Chest full - could not move full stack");
+                        }
                     }
-                }
-            }
-        }
-    }
-}
-#endregion
-
-#region Mouse Right Click Transfer - Chest to Player
-if (ui_open && mouse_check_button_pressed(mb_right)) {
-    var mx = device_mouse_x_to_gui(0);
-    var my = device_mouse_y_to_gui(0);
-
-    for (var i = 0; i < array_length(inventory); i++) {
-        var row = i div 5;
-        var col = i mod 5;
-
-        var x_pos = chest_x + col * (slot_size + padding);
-        var y_pos = chest_y + row * (slot_size + padding);
-
-        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
-            var item = inventory[i];
-
-            if (item != noone) {
-                // Right click, move 1 item
-                var single_item = item_create(item.name, 1);
-                
-                var added = oPlayer.inventory_add_item(single_item);
-                
-                if (added) {
-                    item.count -= 1;
+                } else if (shift_pressed && mouse_check_button_pressed(mb_right)) {
+                    // ===== SHIFT + RIGHT CLICK: MOVE SINGLE ITEM =====
+                    var moved = false;
                     
-                    if (item.count <= 0) {
-                        inventory[i] = noone;
-                    } else {
-                        inventory[i] = item;
+                    // Try stacking in chest
+                    for (var j = 0; j < array_length(inventory); j++) {
+                        var chest_item = inventory[j];
+                        if (chest_item != noone && chest_item.name == inv_item.name) {
+                            // Need to check max stack size
+                            var max_stack = chest_item.data.max_stack;
+                            if (chest_item.count < max_stack) {
+                                // There's room in the stack
+                                chest_item.count += 1;
+                                inv_item.count -= 1;
+                                moved = true;
+                                
+                                // Remove inventory item if emptied
+                                if (inv_item.count <= 0) {
+                                    oPlayer.inventory[slot_index] = noone;
+                                }
+                                
+                                show_debug_message("Added single item to existing chest stack");
+                                break;
+                            }
+                        }
                     }
                     
-                    show_debug_message("Moved 1 " + item.name + " to player");
-                } else {
-                    show_debug_message("Player inventory full for single item");
+                    // If not stacked, find empty slot
+                    if (!moved) {
+                        for (var j = 0; j < array_length(inventory); j++) {
+                            if (inventory[j] == noone) {
+                                // Found empty chest slot
+                                inventory[j] = item_create(inv_item.name, 1);
+                                inv_item.count -= 1;
+                                
+                                // Remove inventory item if emptied
+                                if (inv_item.count <= 0) {
+                                    oPlayer.inventory[slot_index] = noone;
+                                }
+                                
+                                moved = true;
+                                show_debug_message("Moved single item to empty chest slot " + string(j));
+                                break;
+                            }
+                        }
+                        
+                        if (!moved) {
+                            show_debug_message("Chest full - could not move single item");
+                        }
+                    }
                 }
             }
         }
@@ -253,59 +528,6 @@ if (ui_open && mouse_check_button_pressed(mb_left)) {
         if (dragging_item != noone) {
             inventory[drag_origin_index] = dragging_item;
             dragging_item = noone;
-        }
-    }
-}
-#endregion
-
-#region Mouse Click Transfer - Player Hotbar to Chest
-if (ui_open) {
-    var mx = device_mouse_x_to_gui(0);
-    var my = device_mouse_y_to_gui(0);
-    
-    var gui_width = display_get_gui_width();
-    var gui_height = display_get_gui_height();
-    
-    var hotbar_width = (slot_size + padding) * oPlayer.hotbar_size - padding;
-    var hotbar_x = (gui_width - hotbar_width) / 2; // Center hotbar
-    var hotbar_y = gui_height - slot_size - 20;
-
-    for (var i = 0; i < oPlayer.hotbar_size; i++) {
-        var x_pos = hotbar_x + i * (slot_size + padding);
-        var y_pos = hotbar_y;
-
-        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
-            var item = oPlayer.inventory[i];
-
-            if (item != noone) {
-                if (shift_pressed && mouse_check_button_pressed(mb_left)) {
-                    // Shift + Left Click, move full stack
-                    if (transfer_item_from(oPlayer, self, i)) {
-                        show_debug_message("Moved full stack from hotbar slot " + string(i));
-                    } else {
-                        show_debug_message("Chest full or stacking failed.");
-                    }
-                } else if (shift_pressed && mouse_check_button_pressed(mb_right)) {
-                    // Shift + Right Click, move 1 item
-                    var single_item = item_create(item.name, 1);
-                    
-                    var added = inventory_add_item(single_item);
-                    
-                    if (added) {
-                        item.count -= 1;
-                        
-                        if (item.count <= 0) {
-                            oPlayer.inventory[i] = noone;
-                        } else {
-                            oPlayer.inventory[i] = item;
-                        }
-                        
-                        show_debug_message("Moved 1 " + item.name + " from hotbar to chest");
-                    } else {
-                        show_debug_message("Chest full for single item");
-                    }
-                }
-            }
         }
     }
 }

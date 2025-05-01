@@ -59,6 +59,225 @@ if (mouse_check_button_pressed(mb_right)) {
 }
 #endregion
 
+#region Hotbar-Inventory Transfer with Shift-Click
+if (inventory_open && shift_pressed && (mouse_check_button_pressed(mb_left) || mouse_check_button_pressed(mb_right))) {
+    // First check if clicking on hotbar
+    var clicked_hotbar_slot = -1;
+    for (var i = 0; i < hotbar_size; i++) {
+        var slot_x = hotbar_x + i * (slot_size + padding);
+        var slot_y = hotbar_y;
+        if (point_in_rectangle(mx, my, slot_x, slot_y, slot_x + slot_size, slot_y + slot_size)) {
+            clicked_hotbar_slot = i;
+            break;
+        }
+    }
+    
+    // If clicked on hotbar, try to move to inventory
+    if (clicked_hotbar_slot != -1 && inventory[clicked_hotbar_slot] != noone) {
+        var hotbar_item = inventory[clicked_hotbar_slot];
+        
+        if (mouse_check_button_pressed(mb_left)) {
+            // ===== SHIFT + LEFT CLICK: MOVE FULL STACK FROM HOTBAR TO INVENTORY =====
+            var moved = false;
+            
+            // Try to find a slot with the same item type (for stacking)
+            for (var i = 0; i < inventory_size; i++) {
+                var inv_slot = hotbar_size + i;
+                var inv_item = inventory[inv_slot];
+                
+                if (inv_item != noone && inv_item.name == hotbar_item.name) {
+                    // Found matching item, stack them
+                    inventory[inv_slot].count += hotbar_item.count;
+                    inventory[clicked_hotbar_slot] = noone;
+                    moved = true;
+                    show_debug_message("Moved full stack from hotbar to inventory (stacked)");
+                    break;
+                }
+            }
+            
+            // If no matching slot found, find an empty slot
+            if (!moved) {
+                for (var i = 0; i < inventory_size; i++) {
+                    var inv_slot = hotbar_size + i;
+                    if (inventory[inv_slot] == noone) {
+                        // Found empty slot, move item there
+                        inventory[inv_slot] = hotbar_item;
+                        inventory[clicked_hotbar_slot] = noone;
+                        moved = true;
+                        show_debug_message("Moved full stack from hotbar to empty inventory slot");
+                        break;
+                    }
+                }
+                
+                if (!moved) {
+                    show_debug_message("Inventory full - could not move hotbar item");
+                }
+            }
+        } else if (mouse_check_button_pressed(mb_right)) {
+            // ===== SHIFT + RIGHT CLICK: MOVE SINGLE ITEM FROM HOTBAR TO INVENTORY =====
+            var moved = false;
+            
+            // Try to find a slot with the same item type (for stacking)
+            for (var i = 0; i < inventory_size; i++) {
+                var inv_slot = hotbar_size + i;
+                var inv_item = inventory[inv_slot];
+                
+                if (inv_item != noone && inv_item.name == hotbar_item.name) {
+                    // Need to check max stack size
+                    var max_stack = inv_item.data.max_stack;
+                    if (inv_item.count < max_stack) {
+                        // Found matching item with space, add one to it
+                        inventory[inv_slot].count += 1;
+                        hotbar_item.count -= 1;
+                        
+                        // If count reaches 0, remove item from hotbar
+                        if (hotbar_item.count <= 0) {
+                            inventory[clicked_hotbar_slot] = noone;
+                        }
+                        
+                        moved = true;
+                        show_debug_message("Added single item from hotbar to inventory stack");
+                        break;
+                    }
+                }
+            }
+            
+            // If no matching slot found or all are full, find an empty slot
+            if (!moved) {
+                for (var i = 0; i < inventory_size; i++) {
+                    var inv_slot = hotbar_size + i;
+                    if (inventory[inv_slot] == noone) {
+                        // Found empty slot, create new single-item stack
+                        inventory[inv_slot] = item_create(hotbar_item.name, 1);
+                        hotbar_item.count -= 1;
+                        
+                        // If count reaches 0, remove item from hotbar
+                        if (hotbar_item.count <= 0) {
+                            inventory[clicked_hotbar_slot] = noone;
+                        }
+                        
+                        moved = true;
+                        show_debug_message("Moved single item from hotbar to empty inventory slot");
+                        break;
+                    }
+                }
+                
+                if (!moved) {
+                    show_debug_message("Inventory full - could not move single item from hotbar");
+                }
+            }
+        }
+    }
+    
+    // Now check if clicking on inventory
+    var clicked_inv_index = -1;
+    for (var i = 0; i < inventory_size; i++) {
+        var row = i div inv_cols;
+        var col = i mod inv_cols;
+        var x_pos = inv_x + col * (slot_size + padding);
+        var y_pos = inv_y + row * (slot_size + padding);
+        
+        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
+            clicked_inv_index = hotbar_size + i;
+            break;
+        }
+    }
+    
+    // If clicked on inventory, try to move to hotbar
+    if (clicked_inv_index != -1 && inventory[clicked_inv_index] != noone) {
+        var inv_item = inventory[clicked_inv_index];
+        
+        if (mouse_check_button_pressed(mb_left)) {
+            // ===== SHIFT + LEFT CLICK: MOVE FULL STACK FROM INVENTORY TO HOTBAR =====
+            var moved = false;
+            
+            // Try to find a slot with the same item type (for stacking)
+            for (var i = 0; i < hotbar_size; i++) {
+                var hotbar_item = inventory[i];
+                
+                if (hotbar_item != noone && hotbar_item.name == inv_item.name) {
+                    // Found matching item, stack them
+                    inventory[i].count += inv_item.count;
+                    inventory[clicked_inv_index] = noone;
+                    moved = true;
+                    show_debug_message("Moved full stack from inventory to hotbar (stacked)");
+                    break;
+                }
+            }
+            
+            // If no matching slot found, find an empty slot
+            if (!moved) {
+                for (var i = 0; i < hotbar_size; i++) {
+                    if (inventory[i] == noone) {
+                        // Found empty slot, move item there
+                        inventory[i] = inv_item;
+                        inventory[clicked_inv_index] = noone;
+                        moved = true;
+                        show_debug_message("Moved full stack from inventory to empty hotbar slot");
+                        break;
+                    }
+                }
+                
+                if (!moved) {
+                    show_debug_message("Hotbar full - could not move inventory item");
+                }
+            }
+        } else if (mouse_check_button_pressed(mb_right)) {
+            // ===== SHIFT + RIGHT CLICK: MOVE SINGLE ITEM FROM INVENTORY TO HOTBAR =====
+            var moved = false;
+            
+            // Try to find a slot with the same item type (for stacking)
+            for (var i = 0; i < hotbar_size; i++) {
+                var hotbar_item = inventory[i];
+                
+                if (hotbar_item != noone && hotbar_item.name == inv_item.name) {
+                    // Need to check max stack size
+                    var max_stack = hotbar_item.data.max_stack;
+                    if (hotbar_item.count < max_stack) {
+                        // Found matching item with space, add one to it
+                        inventory[i].count += 1;
+                        inv_item.count -= 1;
+                        
+                        // If count reaches 0, remove item from inventory
+                        if (inv_item.count <= 0) {
+                            inventory[clicked_inv_index] = noone;
+                        }
+                        
+                        moved = true;
+                        show_debug_message("Added single item from inventory to hotbar stack");
+                        break;
+                    }
+                }
+            }
+            
+            // If no matching slot found or all are full, find an empty slot
+            if (!moved) {
+                for (var i = 0; i < hotbar_size; i++) {
+                    if (inventory[i] == noone) {
+                        // Found empty slot, create new single-item stack
+                        inventory[i] = item_create(inv_item.name, 1);
+                        inv_item.count -= 1;
+                        
+                        // If count reaches 0, remove item from inventory
+                        if (inv_item.count <= 0) {
+                            inventory[clicked_inv_index] = noone;
+                        }
+                        
+                        moved = true;
+                        show_debug_message("Moved single item from inventory to empty hotbar slot");
+                        break;
+                    }
+                }
+                
+                if (!moved) {
+                    show_debug_message("Hotbar full - could not move single item from inventory");
+                }
+            }
+        }
+    }
+}
+#endregion
+
 #region Drag and Drop Logic
 if (mouse_check_button_pressed(mb_left)) {
     if (dragging_item == noone) {

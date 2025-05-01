@@ -36,9 +36,7 @@ inventory_open = false; // Track if inventory is open
 #endregion
 
 #region Inventory Management
-function inventory_add_item(item) {
-    return inventory_add_item(item);
-}
+// Removed recursive inventory_add_item function
 #endregion
 
 #region Drag and Drop Variables
