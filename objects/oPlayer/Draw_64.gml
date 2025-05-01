@@ -21,17 +21,28 @@ if(drawDebugMenu = true)
 	var debug_height = 120;  // Base height for initial content
 	var ui_height = 16 * 3;  // UI flags (inventory, chest, sign)
 	var activity_height = 16 * 3;  // Activity section (header + 2 items)
+	var bottom_padding = 20;  // Extra padding at the bottom
 	var log_height = 0;
 	
 	if (ds_list_size(debug_logs) > 0) {
-		log_height = min(ds_list_size(debug_logs), debug_log_max) * 16 + 16; // 16px per line + padding
+		var visible_logs = min(ds_list_size(debug_logs), debug_log_max);
+		log_height = visible_logs * 16 + 16 + 30; // 16px per line + header + title bar + extra space
 	}
 	
-	debug_height = debug_height + ui_height + activity_height + log_height;
+	debug_height = debug_height + ui_height + activity_height + log_height + bottom_padding;
 	
+	// Position at bottom left of screen with consistent padding
+	var gui_width = display_get_gui_width();
+	var gui_height = display_get_gui_height();
+	var padding = 10; // Common padding value
+	var debug_x = padding;
+	var debug_y = gui_height - debug_height - padding; // padding from bottom
+	var debug_width = 425;
+	
+	// Main debug background
 	draw_set_colour(c_black);
-	draw_set_alpha(0.45);
-	draw_roundrect_ext(10, 10, 435, 10 + debug_height, 25, 25, 0);
+	draw_set_alpha(0.70);
+	draw_roundrect_ext(debug_x, debug_y, debug_x + debug_width, debug_y + debug_height, 25, 25, 0);
 	draw_set_alpha(1);
 	
 	// GET WINDOW RESOLUTION
@@ -45,15 +56,15 @@ if(drawDebugMenu = true)
 	draw_set_halign(fa_left);
 	draw_set_valign(fa_top);
 	draw_set_colour(c_red);
-	draw_text(20, 16, "DEVELOPER DEBUG");
+	draw_text(debug_x + padding, debug_y + 16, "DEVELOPER DEBUG");
 	draw_set_colour(c_white);  
-	draw_text_transformed(20, 48, "Coordinates X:" + _strPlayerX + "px" + " Y:" + _strPlayerY + "px", 1, 1, 0);
+	draw_text_transformed(debug_x + padding, debug_y + 48, "Coordinates X:" + _strPlayerX + "px" + " Y:" + _strPlayerY + "px", 1, 1, 0);
 
 	// WINDOW SIZE
 	draw_set_halign(fa_left);
 	draw_set_valign(fa_top);
 	draw_set_colour(c_white); 
-	draw_text_transformed(20, 64, "Window Size: Width - " + _strX + "px, " +  "Height - " +_strY + "px", 1, 1, 0);
+	draw_text_transformed(debug_x + padding, debug_y + 64, "Window Size: Width - " + _strX + "px, " +  "Height - " +_strY + "px", 1, 1, 0);
 	
 	// PLAYER STATE
 	var _playerState = global.stateName;
@@ -61,18 +72,18 @@ if(drawDebugMenu = true)
 	draw_set_halign(fa_left);
 	draw_set_valign(fa_top);
 	draw_set_colour(c_white); 
-	draw_text_transformed(20, 82, "Player State: " +  _playerState, 1, 1, 0);
+	draw_text_transformed(debug_x + padding, debug_y + 82, "Player State: " +  _playerState, 1, 1, 0);
 	
 	// UI STATES
 	draw_set_colour(c_yellow);
-	draw_text(20, 100, "UI State Flags:");
+	draw_text(debug_x + padding, debug_y + 100, "UI State Flags:");
 	draw_set_colour(c_white);
 	
-	var ui_y = 118;
+	var ui_y = debug_y + 118;
 	// Player inventory state
 	var inv_color = inventory_open ? c_lime : c_gray;
 	draw_set_colour(inv_color);
-	draw_text(30, ui_y, "Inventory Open: " + string(inventory_open));
+	draw_text(debug_x + padding + 10, ui_y, "Inventory Open: " + string(inventory_open));
 	ui_y += 16;
 	
 	// Check if any chest UI is open
@@ -87,7 +98,7 @@ if(drawDebugMenu = true)
 	}
 	var chest_color = chest_ui_open ? c_lime : c_gray;
 	draw_set_colour(chest_color);
-	draw_text(30, ui_y, "Chest Open: " + string(chest_ui_open));
+	draw_text(debug_x + padding + 10, ui_y, "Chest Open: " + string(chest_ui_open));
 	ui_y += 16;
 	
 	// Check if any sign textbox is open
@@ -104,13 +115,13 @@ if(drawDebugMenu = true)
 	}
 	var sign_color = sign_ui_open ? c_lime : c_gray;
 	draw_set_colour(sign_color);
-	draw_text(30, ui_y, "Reading Sign: " + string(sign_ui_open) + (sign_ui_open ? " (ID: " + sign_id + ")" : ""));
+	draw_text(debug_x + padding + 10, ui_y, "Reading Sign: " + string(sign_ui_open) + (sign_ui_open ? " (ID: " + sign_id + ")" : ""));
 	ui_y += 16;
 	
 	// RECENT ACTIVITIES
 	ui_y += 8; // Extra spacing
 	draw_set_colour(c_yellow);
-	draw_text(20, ui_y, "Recent Activities:");
+	draw_text(debug_x + padding, ui_y, "Recent Activities:");
 	ui_y += 16;
 	
 	// Last item pickup
@@ -119,7 +130,7 @@ if(drawDebugMenu = true)
 	if (pickup_time > 0) {
 		pickup_ago = " (" + string((current_time - pickup_time) div 1000) + "s ago)";
 	}
-	draw_text(30, ui_y, "Last Item: " + last_pickup + pickup_ago);
+	draw_text(debug_x + padding + 10, ui_y, "Last Item: " + last_pickup + pickup_ago);
 	ui_y += 16;
 	
 	// Last sign interaction
@@ -128,18 +139,88 @@ if(drawDebugMenu = true)
 	if (sign_time > 0) {
 		sign_ago = " (" + string((current_time - sign_time) div 1000) + "s ago)";
 	}
-	draw_text(30, ui_y, "Last Sign: " + last_sign + sign_ago);
+	draw_text(debug_x + padding + 10, ui_y, "Last Sign: " + last_sign + sign_ago);
 	ui_y += 16;
 	
 	// CONSOLE LOGS
 	if (ds_list_size(debug_logs) > 0) {
-		var log_top = 10 + debug_height - log_height;
-		draw_set_colour(c_yellow);
-		draw_text(20, log_top, "Console Log:");
+		var log_top = ui_y + 8; // Additional spacing
 		
-		for (var i = 0; i < min(ds_list_size(debug_logs), debug_log_max); i++) {
-			draw_set_colour(ds_list_find_value(debug_log_colors, i));
-			draw_text(30, log_top + 16 + (i * 16), ds_list_find_value(debug_logs, i));
+		// Console header
+		draw_set_colour(c_yellow);
+		draw_text(debug_x + padding, log_top, "Console Log:");
+		log_top += 16;
+		
+		// Calculate console dimensions to ensure it fits within the debug window
+		var console_width = debug_width - (padding * 2);
+		var visible_logs = min(ds_list_size(debug_logs), debug_log_max);
+		var console_height = (visible_logs * 16) + 24; // Log entries + title bar + small padding
+		
+		// Draw console background (terminal-like)
+		draw_set_alpha(0.8);
+		draw_set_colour(c_black);
+		draw_roundrect_ext(
+			debug_x + padding, 
+			log_top, 
+			debug_x + padding + console_width, 
+			log_top + console_height, 
+			10, 10, false
+		);
+		draw_set_alpha(0.7);
+		draw_set_colour(c_dkgray);
+		draw_roundrect_ext(
+			debug_x + padding, 
+			log_top, 
+			debug_x + padding + console_width, 
+			log_top + console_height,
+			10, 10, true
+		);
+		draw_set_alpha(1);
+		
+		// Draw console title bar
+		draw_set_alpha(0.9);
+		draw_set_colour(make_color_rgb(50, 50, 60));
+		draw_rectangle(
+			debug_x + padding, 
+			log_top, 
+			debug_x + padding + console_width, 
+			log_top + 18, 
+			false
+		);
+		draw_set_alpha(1);
+		draw_set_colour(c_white);
+		draw_set_halign(fa_center);
+		draw_text(debug_x + padding + (console_width / 2), log_top + 5, "GAME CONSOLE");
+		draw_set_halign(fa_left);
+		
+		// Adjust log start position after title bar
+		log_top += 20;
+		
+		// Draw console logs with prompt and timestamp (oldest to newest, top to bottom)
+		for (var i = 0; i < visible_logs; i++) {
+			// i=0 is oldest log, get proper index from our lists
+			var log_index = i;
+			var log_message = ds_list_find_value(debug_logs, log_index);
+			var log_color = ds_list_find_value(debug_log_colors, log_index);
+			
+			// Get the actual timestamp from our list
+			var _timeMS = ds_list_find_value(debug_log_times, log_index);
+			var _mins = string(_timeMS div 60000);
+			var _secs = string((_timeMS div 1000) mod 60);
+			
+			// Pad with zeros
+			if (string_length(_mins) < 2) _mins = "0" + _mins;
+			if (string_length(_secs) < 2) _secs = "0" + _secs;
+			
+			var _timestamp = _mins + ":" + _secs;
+			
+			// Draw timestamp and prompt
+			draw_set_colour(c_gray);
+			draw_text(debug_x + padding + 5, log_top + (i * 16), "[" + _timestamp + "] >");
+			
+			// Draw the actual message
+			draw_set_colour(log_color);
+			draw_text(debug_x + padding + 70, log_top + (i * 16), log_message);
 		}
 	}
 }

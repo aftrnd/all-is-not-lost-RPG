@@ -8,4 +8,8 @@ if (ds_exists(debug_logs, ds_type_list)) {
 
 if (ds_exists(debug_log_colors, ds_type_list)) {
     ds_list_destroy(debug_log_colors);
+}
+
+if (ds_exists(debug_log_times, ds_type_list)) {
+    ds_list_destroy(debug_log_times);
 } 

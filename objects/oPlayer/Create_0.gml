@@ -11,6 +11,7 @@ drawDebugMenu = false;
 debug_logs = ds_list_create(); // Store log messages
 debug_log_max = 10; // Maximum number of logs to display
 debug_log_colors = ds_list_create(); // Store colors for each log entry
+debug_log_times = ds_list_create(); // Store timestamps for each log entry
 
 // Activity Tracking
 last_pickup = "None"; // Last item picked up
@@ -31,17 +32,32 @@ state = player_state_default;
 /// @param {string} message The message to log
 /// @param {constant} color The color of the message (optional, defaults to white)
 function debug_log(_message, _color = c_white) {
+    // Format timestamp (minutes:seconds.milliseconds)
+    var _timeMS = current_time;
+    var _minutes = string(_timeMS div 60000);
+    var _seconds = string((_timeMS div 1000) mod 60);
+    var _ms = string(_timeMS mod 1000);
+    
+    // Pad with zeros for consistent formatting
+    if (string_length(_minutes) < 2) _minutes = "0" + _minutes;
+    if (string_length(_seconds) < 2) _seconds = "0" + _seconds;
+    while (string_length(_ms) < 3) _ms = "0" + _ms;
+    
+    var _timestamp = _minutes + ":" + _seconds + "." + _ms;
+    
     // Add to GameMaker's built-in debug console
-    show_debug_message(_message);
+    show_debug_message(_timestamp + " - " + _message);
     
-    // Add to our in-game debug display
-    ds_list_insert(debug_logs, 0, _message);
-    ds_list_insert(debug_log_colors, 0, _color);
+    // Add new logs to the END of the lists (newest at bottom)
+    ds_list_add(debug_logs, _message);
+    ds_list_add(debug_log_colors, _color);
+    ds_list_add(debug_log_times, _timeMS);
     
-    // Trim lists if they exceed max size
+    // Trim lists if they exceed max size (remove oldest entries)
     while (ds_list_size(debug_logs) > debug_log_max) {
-        ds_list_delete(debug_logs, debug_log_max);
-        ds_list_delete(debug_log_colors, debug_log_max);
+        ds_list_delete(debug_logs, 0);
+        ds_list_delete(debug_log_colors, 0);
+        ds_list_delete(debug_log_times, 0);
     }
     
     // Track specific activities
