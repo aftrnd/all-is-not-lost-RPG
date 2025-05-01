@@ -37,6 +37,8 @@ keyActivate = keyboard_check_pressed(ord("E")); // Generic 'Activate' key...
 // Toggle inventory with Tab
 if (keyboard_check_pressed(vk_tab)) {
     inventory_open = !inventory_open;
+    // Log inventory state change
+    debug_log("Inventory " + (inventory_open ? "opened" : "closed"), c_lime);
 }
 #endregion
 

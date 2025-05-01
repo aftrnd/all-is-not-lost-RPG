@@ -17,9 +17,21 @@ var gui_height = display_get_gui_height();
 #region Debug Menu
 if(drawDebugMenu = true)
 {
+	// Calculate debug menu height based on content
+	var debug_height = 120;  // Base height for initial content
+	var ui_height = 16 * 3;  // UI flags (inventory, chest, sign)
+	var activity_height = 16 * 3;  // Activity section (header + 2 items)
+	var log_height = 0;
+	
+	if (ds_list_size(debug_logs) > 0) {
+		log_height = min(ds_list_size(debug_logs), debug_log_max) * 16 + 16; // 16px per line + padding
+	}
+	
+	debug_height = debug_height + ui_height + activity_height + log_height;
+	
 	draw_set_colour(c_black);
 	draw_set_alpha(0.45);
-	draw_roundrect_ext(10, 10, 435, 120, 25, 25, 0);
+	draw_roundrect_ext(10, 10, 435, 10 + debug_height, 25, 25, 0);
 	draw_set_alpha(1);
 	
 	// GET WINDOW RESOLUTION
@@ -51,6 +63,85 @@ if(drawDebugMenu = true)
 	draw_set_colour(c_white); 
 	draw_text_transformed(20, 82, "Player State: " +  _playerState, 1, 1, 0);
 	
+	// UI STATES
+	draw_set_colour(c_yellow);
+	draw_text(20, 100, "UI State Flags:");
+	draw_set_colour(c_white);
+	
+	var ui_y = 118;
+	// Player inventory state
+	var inv_color = inventory_open ? c_lime : c_gray;
+	draw_set_colour(inv_color);
+	draw_text(30, ui_y, "Inventory Open: " + string(inventory_open));
+	ui_y += 16;
+	
+	// Check if any chest UI is open
+	var chest_ui_open = false;
+	var chest_count = instance_number(oChest);
+	for (var i = 0; i < chest_count; i++) {
+		var chest_obj = instance_find(oChest, i);
+		if (chest_obj != noone && chest_obj.ui_open) {
+			chest_ui_open = true;
+			break;
+		}
+	}
+	var chest_color = chest_ui_open ? c_lime : c_gray;
+	draw_set_colour(chest_color);
+	draw_text(30, ui_y, "Chest Open: " + string(chest_ui_open));
+	ui_y += 16;
+	
+	// Check if any sign textbox is open
+	var sign_ui_open = false;
+	var sign_id = "";
+	var sign_count = instance_number(oSign);
+	for (var i = 0; i < sign_count; i++) {
+		var sign_obj = instance_find(oSign, i);
+		if (sign_obj != noone && variable_instance_exists(sign_obj, "show_textbox") && sign_obj.show_textbox) {
+			sign_ui_open = true;
+			sign_id = sign_obj.text_id;
+			break;
+		}
+	}
+	var sign_color = sign_ui_open ? c_lime : c_gray;
+	draw_set_colour(sign_color);
+	draw_text(30, ui_y, "Reading Sign: " + string(sign_ui_open) + (sign_ui_open ? " (ID: " + sign_id + ")" : ""));
+	ui_y += 16;
+	
+	// RECENT ACTIVITIES
+	ui_y += 8; // Extra spacing
+	draw_set_colour(c_yellow);
+	draw_text(20, ui_y, "Recent Activities:");
+	ui_y += 16;
+	
+	// Last item pickup
+	draw_set_colour(c_fuchsia);
+	var pickup_ago = "";
+	if (pickup_time > 0) {
+		pickup_ago = " (" + string((current_time - pickup_time) div 1000) + "s ago)";
+	}
+	draw_text(30, ui_y, "Last Item: " + last_pickup + pickup_ago);
+	ui_y += 16;
+	
+	// Last sign interaction
+	draw_set_colour(c_orange);
+	var sign_ago = "";
+	if (sign_time > 0) {
+		sign_ago = " (" + string((current_time - sign_time) div 1000) + "s ago)";
+	}
+	draw_text(30, ui_y, "Last Sign: " + last_sign + sign_ago);
+	ui_y += 16;
+	
+	// CONSOLE LOGS
+	if (ds_list_size(debug_logs) > 0) {
+		var log_top = 10 + debug_height - log_height;
+		draw_set_colour(c_yellow);
+		draw_text(20, log_top, "Console Log:");
+		
+		for (var i = 0; i < min(ds_list_size(debug_logs), debug_log_max); i++) {
+			draw_set_colour(ds_list_find_value(debug_log_colors, i));
+			draw_text(30, log_top + 16 + (i * 16), ds_list_find_value(debug_logs, i));
+		}
+	}
 }
 #endregion
 

@@ -23,10 +23,18 @@ if (player_near) {
             opening = true;
             closing = false;
             ui_open = true;
+            // Log chest opening for debug display
+            if (instance_exists(oPlayer)) {
+                oPlayer.debug_log("Chest opened at x:" + string(x) + " y:" + string(y), c_yellow);
+            }
         } else {
             closing = true;
             opening = false;
             ui_open = false;
+            // Log chest closing for debug display
+            if (instance_exists(oPlayer)) {
+                oPlayer.debug_log("Chest closed", c_yellow);
+            }
         }
     }
 } else {
@@ -34,6 +42,10 @@ if (player_near) {
         closing = true;
         opening = false;
         ui_open = false;
+        // Log forced chest closing for debug display
+        if (instance_exists(oPlayer)) {
+            oPlayer.debug_log("Chest forced closed - player moved away", c_orange);
+        }
     }
 }
 #endregion

@@ -18,6 +18,14 @@ if (place_meeting(x, y, oPlayer)) {
             text_displayed = "";
             char_index = 0;
             text_timer = 0;
+            
+            // Log sign interaction to debug console
+            var p = instance_nearest(x, y, oPlayer);
+            if (p != noone) {
+                with (p) {
+                    debug_log("Sign read: " + other.text_id, c_orange);
+                }
+            }
         }
         else if (char_index < string_length(text_full)) {
             char_index = string_length(text_full);
@@ -25,6 +33,14 @@ if (place_meeting(x, y, oPlayer)) {
         }
         else {
             show_textbox = false;
+            
+            // Log when sign reading is finished
+            var p = instance_nearest(x, y, oPlayer);
+            if (p != noone) {
+                with (p) {
+                    debug_log("Finished reading sign: " + other.text_id, c_orange);
+                }
+            }
         }
     }
 }
@@ -32,6 +48,14 @@ else {
     // Player walked away from the sign
     if (show_textbox) {
         show_textbox = false;
+        
+        // Log when sign reading is interrupted by walking away
+        var p = instance_nearest(x, y, oPlayer);
+        if (p != noone) {
+            with (p) {
+                debug_log("Interrupted sign reading: " + other.text_id, c_red);
+            }
+        }
     }
 }
 #endregion
