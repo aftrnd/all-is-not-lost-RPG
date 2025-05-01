@@ -107,49 +107,56 @@ if (ui_open && (mouse_check_button_pressed(mb_left) || mouse_check_button_presse
 }
 #endregion
 
-#region Mouse Click Transfer - Player Hotbar to Chest
-if (ui_open) {
+#region Mouse Click Transfer - Player Inventory to Chest
+if (ui_open && oPlayer.inventory_open) {
     var mx = device_mouse_x_to_gui(0);
     var my = device_mouse_y_to_gui(0);
-
+    
+    // Calculate player inventory dimensions
     var gui_width = display_get_gui_width();
     var gui_height = display_get_gui_height();
+    var inv_cols = 5;
+    var inv_rows = ceil(oPlayer.inventory_size / inv_cols);
+    var inv_width = (slot_size + padding) * inv_cols - padding;
+    var inv_height = (slot_size + padding) * inv_rows - padding;
+    var inv_x = (gui_width - inv_width) / 2;
+    var inv_y = (gui_height - inv_height) / 2 - 30;
     
-    var hotbar_width = (slot_size + padding) * oPlayer.hotbar_size - padding;
-    var hotbar_x = (gui_width - hotbar_width) / 2; // Center hotbar
-    var hotbar_y = gui_height - slot_size - 20;
-
-    for (var i = 0; i < oPlayer.hotbar_size; i++) {
-        var x_pos = hotbar_x + i * (slot_size + padding);
-        var y_pos = hotbar_y;
-
-        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
-            var item = oPlayer.inventory[i];
-
+    // Loop through player inventory slots
+    for (var i = 0; i < oPlayer.inventory_size; i++) {
+        var row = i div inv_cols;
+        var col = i mod inv_cols;
+        var slot_x = inv_x + col * (slot_size + padding);
+        var slot_y = inv_y + row * (slot_size + padding);
+        var slot_index = oPlayer.hotbar_size + i;
+        
+        if (point_in_rectangle(mx, my, slot_x, slot_y, slot_x + slot_size, slot_y + slot_size)) {
+            var item = oPlayer.inventory[slot_index];
+            
             if (item != noone) {
                 if (shift_pressed && mouse_check_button_pressed(mb_left)) {
                     // Shift + Left Click, move full stack
-                    if (transfer_item_from(oPlayer, self, i)) {
-                        show_debug_message("Moved full stack from hotbar slot " + string(i));
+                    if (transfer_item_from(oPlayer, self, slot_index)) {
+                        show_debug_message("Moved full stack from inventory slot " + string(slot_index));
                     } else {
                         show_debug_message("Chest full or stacking failed.");
                     }
                 } else if (shift_pressed && mouse_check_button_pressed(mb_right)) {
                     // Shift + Right Click, move 1 item
-                    var single_item = item_create(item.name, 1); // include .data!
+                    var single_item = item_create(item.name, 1);
                     
-                    var added = inventory_add_item(single_item); // ✅ FIXED
+                    var added = inventory_add_item(single_item);
                     
                     if (added) {
                         item.count -= 1;
                         
                         if (item.count <= 0) {
-                            oPlayer.inventory[i] = noone;
+                            oPlayer.inventory[slot_index] = noone;
                         } else {
-                            oPlayer.inventory[i] = item;
+                            oPlayer.inventory[slot_index] = item;
                         }
                         
-                        show_debug_message("Moved 1 " + item.name);
+                        show_debug_message("Moved 1 " + item.name + " from inventory to chest");
                     } else {
                         show_debug_message("Chest full for single item");
                     }
@@ -246,6 +253,59 @@ if (ui_open && mouse_check_button_pressed(mb_left)) {
         if (dragging_item != noone) {
             inventory[drag_origin_index] = dragging_item;
             dragging_item = noone;
+        }
+    }
+}
+#endregion
+
+#region Mouse Click Transfer - Player Hotbar to Chest
+if (ui_open) {
+    var mx = device_mouse_x_to_gui(0);
+    var my = device_mouse_y_to_gui(0);
+    
+    var gui_width = display_get_gui_width();
+    var gui_height = display_get_gui_height();
+    
+    var hotbar_width = (slot_size + padding) * oPlayer.hotbar_size - padding;
+    var hotbar_x = (gui_width - hotbar_width) / 2; // Center hotbar
+    var hotbar_y = gui_height - slot_size - 20;
+
+    for (var i = 0; i < oPlayer.hotbar_size; i++) {
+        var x_pos = hotbar_x + i * (slot_size + padding);
+        var y_pos = hotbar_y;
+
+        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
+            var item = oPlayer.inventory[i];
+
+            if (item != noone) {
+                if (shift_pressed && mouse_check_button_pressed(mb_left)) {
+                    // Shift + Left Click, move full stack
+                    if (transfer_item_from(oPlayer, self, i)) {
+                        show_debug_message("Moved full stack from hotbar slot " + string(i));
+                    } else {
+                        show_debug_message("Chest full or stacking failed.");
+                    }
+                } else if (shift_pressed && mouse_check_button_pressed(mb_right)) {
+                    // Shift + Right Click, move 1 item
+                    var single_item = item_create(item.name, 1);
+                    
+                    var added = inventory_add_item(single_item);
+                    
+                    if (added) {
+                        item.count -= 1;
+                        
+                        if (item.count <= 0) {
+                            oPlayer.inventory[i] = noone;
+                        } else {
+                            oPlayer.inventory[i] = item;
+                        }
+                        
+                        show_debug_message("Moved 1 " + item.name + " from hotbar to chest");
+                    } else {
+                        show_debug_message("Chest full for single item");
+                    }
+                }
+            }
         }
     }
 }

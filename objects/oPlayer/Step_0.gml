@@ -14,6 +14,14 @@ var gui_height = display_get_gui_height();
 var hotbar_width = (slot_size + padding) * hotbar_size - padding;
 var hotbar_x = (gui_width - hotbar_width) / 2;
 var hotbar_y = gui_height - slot_size - 20;
+
+// Calculate inventory dimensions for drag and drop
+var inv_cols = 5;
+var inv_rows = ceil(inventory_size / inv_cols);
+var inv_width = (slot_size + padding) * inv_cols - padding;
+var inv_height = (slot_size + padding) * inv_rows - padding;
+var inv_x = (gui_width - inv_width) / 2;
+var inv_y = (gui_height - inv_height) / 2 - 30;
 #endregion
 
 #region Keyboard Bindings
@@ -21,6 +29,11 @@ keyRight = keyboard_check(vk_right);
 keyLeft = keyboard_check(vk_left);
 keyJump = keyboard_check_pressed(vk_space);
 keyActivate = keyboard_check_pressed(ord("E")); // Generic 'Activate' key...
+
+// Toggle inventory with Tab
+if (keyboard_check_pressed(vk_tab)) {
+    inventory_open = !inventory_open;
+}
 #endregion
 
 #region Hotbar Selection
@@ -49,7 +62,10 @@ if (mouse_check_button_pressed(mb_right)) {
 #region Drag and Drop Logic
 if (mouse_check_button_pressed(mb_left)) {
     if (dragging_item == noone) {
-        // Start dragging
+        // Start dragging from hotbar
+        var found_item = false;
+        
+        // Check hotbar slots first
         for (var i = 0; i < hotbar_size; i++) {
             var slot_x = hotbar_x + i * (slot_size + padding);
             var slot_y = hotbar_y;
@@ -60,13 +76,38 @@ if (mouse_check_button_pressed(mb_left)) {
                     drag_offset_x = mx - slot_x;
                     drag_offset_y = my - slot_y;
                     inventory[i] = noone;
+                    found_item = true;
                     break;
+                }
+            }
+        }
+        
+        // If inventory is open, check inventory slots
+        if (!found_item && inventory_open) {
+            for (var i = 0; i < inventory_size; i++) {
+                var row = i div inv_cols;
+                var col = i mod inv_cols;
+                var x_pos = inv_x + col * (slot_size + padding);
+                var y_pos = inv_y + row * (slot_size + padding);
+                
+                if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
+                    var slot_index = hotbar_size + i;
+                    if (inventory[slot_index] != noone) {
+                        dragging_item = inventory[slot_index];
+                        drag_origin_index = slot_index;
+                        drag_offset_x = mx - x_pos;
+                        drag_offset_y = my - y_pos;
+                        inventory[slot_index] = noone;
+                        break;
+                    }
                 }
             }
         }
     } else {
         // Drop item
         var dropped = false;
+        
+        // Try to drop in hotbar
         for (var i = 0; i < hotbar_size; i++) {
             var slot_x = hotbar_x + i * (slot_size + padding);
             var slot_y = hotbar_y;
@@ -84,6 +125,32 @@ if (mouse_check_button_pressed(mb_left)) {
                 break;
             }
         }
+        
+        // Try to drop in inventory if open
+        if (!dropped && inventory_open) {
+            for (var i = 0; i < inventory_size; i++) {
+                var row = i div inv_cols;
+                var col = i mod inv_cols;
+                var x_pos = inv_x + col * (slot_size + padding);
+                var y_pos = inv_y + row * (slot_size + padding);
+                
+                if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
+                    var slot_index = hotbar_size + i;
+                    if (inventory[slot_index] == noone) {
+                        inventory[slot_index] = dragging_item;
+                    } else {
+                        // Swap items
+                        var temp = inventory[slot_index];
+                        inventory[slot_index] = dragging_item;
+                        inventory[drag_origin_index] = temp;
+                    }
+                    dragging_item = noone;
+                    dropped = true;
+                    break;
+                }
+            }
+        }
+        
         if (!dropped) {
             // If not dropped in a valid slot, return to origin
             inventory[drag_origin_index] = dragging_item;

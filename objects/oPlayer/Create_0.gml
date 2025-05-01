@@ -32,6 +32,7 @@ inventory_size = 10;
 total_slots = hotbar_size + inventory_size;
 inventory = array_create(total_slots, noone);
 selected_slot = 0; // Default selected hotbar slot
+inventory_open = false; // Track if inventory is open
 #endregion
 
 #region Inventory Management
