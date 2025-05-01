@@ -22,6 +22,10 @@ var inv_width = (slot_size + padding) * inv_cols - padding;
 var inv_height = (slot_size + padding) * inv_rows - padding;
 var inv_x = (gui_width - inv_width) / 2;
 var inv_y = (gui_height - inv_height) / 2 - 30;
+
+// Player's Coordinates 
+playerX = floor(x);
+playerY = floor(y);
 #endregion
 
 #region Keyboard Bindings
@@ -378,10 +382,6 @@ if (mouse_check_button_pressed(mb_left)) {
     }
 }
 #endregion
-
-// Player's Coordinates 
-playerX = floor(x);
-playerY = floor(y);
 
 // Sets which state the player should be in
 script_execute(state);
