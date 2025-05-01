@@ -31,6 +31,7 @@ hotbar_size = 5;
 inventory_size = 10;
 total_slots = hotbar_size + inventory_size;
 inventory = array_create(total_slots, noone);
+selected_slot = 0; // Default selected hotbar slot
 #endregion
 
 #region Inventory Management
@@ -46,6 +47,5 @@ drag_offset_x = 0;
 drag_offset_y = 0;
 #endregion
 
-slot_w = 64;
-slot_h = 32;
-padding = 4;
+slot_size = 64;
+padding = 8;

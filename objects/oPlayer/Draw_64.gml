@@ -47,48 +47,92 @@ if(drawDebugMenu = true)
 #endregion
 
 #region Hotbar
+draw_set_font(fnt_body);
 
-var slot_w = 64;
-var slot_h = 32;
-var padding = 4;
+var slot_size = 64; // Square slots
+var padding = 8;
+var border = 2;
+var gui_width = display_get_gui_width();
+var gui_height = display_get_gui_height();
+
+// Calculate hotbar dimensions
+var hotbar_width = (slot_size + padding) * hotbar_size - padding;
+var hotbar_x = (gui_width - hotbar_width) / 2; // Center hotbar
+var hotbar_y = gui_height - slot_size - 20;
+
+// Draw hotbar background
+draw_set_alpha(0.7);
+draw_set_color(c_black);
+draw_roundrect(
+    hotbar_x - padding,
+    hotbar_y - padding,
+    hotbar_x + hotbar_width + padding,
+    hotbar_y + slot_size + padding,
+    false
+);
+
+// Draw hotbar border
+draw_set_alpha(0.8);
+draw_set_color(c_dkgray);
+draw_roundrect(
+    hotbar_x - padding,
+    hotbar_y - padding,
+    hotbar_x + hotbar_width + padding,
+    hotbar_y + slot_size + padding,
+    true
+);
+draw_set_alpha(1);
 
 for (var i = 0; i < hotbar_size; i++) {
-    var x_pos = 32 + i * (slot_w + padding);
-    var y_pos = display_get_gui_height() - slot_h - 16;
+    var x_pos = hotbar_x + i * (slot_size + padding);
+    var y_pos = hotbar_y;
 
-    var is_hovered = point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h);
+    var is_hovered = point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size);
+    var is_selected = (variable_instance_exists(id, "selected_slot") && i == selected_slot) || (i == 0 && !variable_instance_exists(id, "selected_slot"));
 
-    // Default black outline only
+    // Semi-transparent slot background
+    draw_set_alpha(0.5);
     draw_set_color(c_black);
-    draw_rectangle(x_pos, y_pos, x_pos + slot_w, y_pos + slot_h, false);
-
-    if (is_hovered) {
-        // Step 1: Black fill
-        draw_set_color(c_white);
-        draw_rectangle(x_pos, y_pos, x_pos + slot_w, y_pos + slot_h, true);
-
-        // Step 2: Slightly inset white outline
-        draw_set_color(c_black);
-        draw_rectangle(x_pos + 1, y_pos + 1, x_pos + slot_w - 1, y_pos + slot_h - 1, false);
+    draw_roundrect(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, false);
+    
+    // Slot border - white if selected or hovered
+    draw_set_alpha(0.9);
+    if (is_selected) {
+        draw_set_color(c_yellow);
+    } else {
+        draw_set_color(is_hovered ? c_white : c_dkgray);
     }
+    draw_roundrect(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, true);
+    
+    // Inner border when hovered or selected
+    if (is_hovered || is_selected) {
+        draw_set_alpha(0.7);
+        draw_set_color(is_selected ? c_yellow : c_white);
+        draw_roundrect(x_pos + border, y_pos + border, x_pos + slot_size - border, y_pos + slot_size - border, true);
+    }
+    
+    draw_set_alpha(1);
 
-    // Draw item name
+    // Draw item
     if (inventory[i] != noone) {
         var item = inventory[i];
         var icon = item.data.icon;
         // Calculate scaling to fit slot
         var spr_w = sprite_get_width(icon);
         var spr_h = sprite_get_height(icon);
-        var scale = min((slot_h - padding * 2) / spr_h, (slot_w - padding * 2) / spr_w);
-        var icon_x = x_pos + (slot_w - spr_w * scale) / 2;
-        var icon_y = y_pos + (slot_h - spr_h * scale) / 2;
+        var scale = min((slot_size - padding * 2) / max(spr_w, spr_h), (slot_size - padding * 2) / max(spr_w, spr_h));
+        var icon_x = x_pos + (slot_size - spr_w * scale) / 2;
+        var icon_y = y_pos + (slot_size - spr_h * scale) / 2;
         draw_sprite_ext(icon, 0, icon_x, icon_y, scale, scale, 0, c_white, 1);
 
-        // Draw count in bottom right
-        draw_set_color(c_white);
+        // Draw count with shadow for better readability
+        draw_set_color(c_black);
         draw_set_halign(fa_right);
         draw_set_valign(fa_bottom);
-        draw_text(x_pos + slot_w - padding, y_pos + slot_h - padding, string(item.count));
+        draw_text(x_pos + slot_size - padding + 1, y_pos + slot_size - padding + 1, string(item.count));
+        
+        draw_set_color(c_white);
+        draw_text(x_pos + slot_size - padding, y_pos + slot_size - padding, string(item.count));
 
         draw_set_halign(fa_left);   // Reset after use
         draw_set_valign(fa_top);
@@ -103,15 +147,18 @@ if (dragging_item != noone && is_struct(dragging_item)) {
     // Calculate scaling to fit slot under mouse
     var spr_w = sprite_get_width(icon);
     var spr_h = sprite_get_height(icon);
-    var scale = min((slot_h - padding * 2) / spr_h, (slot_w - padding * 2) / spr_w);
-    var draw_x = mx - spr_w * scale / 2;
-    var draw_y = my - spr_h * scale / 2;
-    draw_sprite_ext(icon, 0, draw_x, draw_y, scale, scale, 0, c_white, 0.6);
+    var scale = min((slot_size - padding * 2) / max(spr_w, spr_h), (slot_size - padding * 2) / max(spr_w, spr_h));
+    var draw_x = mx - (spr_w * scale / 2);
+    var draw_y = my - (spr_h * scale / 2);
+    draw_sprite_ext(icon, 0, draw_x, draw_y, scale, scale, 0, c_white, 0.8);
 
-    // Draw count at bottom right of icon
-    draw_set_color(c_white);
+    // Draw count with shadow for better visibility
+    draw_set_color(c_black);
     draw_set_halign(fa_right);
     draw_set_valign(fa_bottom);
+    draw_text(draw_x + spr_w * scale + 1, draw_y + spr_h * scale + 1, string(item.count));
+    
+    draw_set_color(c_white);
     draw_text(draw_x + spr_w * scale, draw_y + spr_h * scale, string(item.count));
 
     draw_set_halign(fa_left);

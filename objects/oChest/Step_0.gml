@@ -4,9 +4,10 @@
 #region Variables
 var shift_pressed = keyboard_check(vk_shift);
 
-var slot_w = 64;
-var slot_h = 32;
-var padding = 4;
+// Update to match the dimensions in Draw_64.gml
+var slot_size = 64;
+var padding = 8;
+var border = 2;
 
 var chest_x = 64;
 var chest_y = 64;
@@ -70,13 +71,13 @@ if (ui_open && (mouse_check_button_pressed(mb_left) || mouse_check_button_presse
         var row = i div 5;
         var col = i mod 5;
 
-        var x_pos = chest_x + col * (slot_w + padding);
-        var y_pos = chest_y + row * (slot_h + padding);
+        var x_pos = chest_x + col * (slot_size + padding);
+        var y_pos = chest_y + row * (slot_size + padding);
 
         var mx = device_mouse_x_to_gui(0);
         var my = device_mouse_y_to_gui(0);
 
-        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h)) {
+        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
             if (shift_pressed && mouse_check_button_pressed(mb_left)) {
                 // Shift + Left Click: Move full stack
                 if (transfer_item_from(self, oPlayer, i)) {
@@ -111,16 +112,18 @@ if (ui_open) {
     var mx = device_mouse_x_to_gui(0);
     var my = device_mouse_y_to_gui(0);
 
-    var slot_w = 64;
-    var slot_h = 32;
-    var padding = 4;
-    var hotbar_y = display_get_gui_height() - slot_h - 16;
+    var gui_width = display_get_gui_width();
+    var gui_height = display_get_gui_height();
+    
+    var hotbar_width = (slot_size + padding) * oPlayer.hotbar_size - padding;
+    var hotbar_x = (gui_width - hotbar_width) / 2; // Center hotbar
+    var hotbar_y = gui_height - slot_size - 20;
 
-    for (var i = 0; i < 5; i++) {
-        var x_pos = 32 + i * (slot_w + padding);
+    for (var i = 0; i < oPlayer.hotbar_size; i++) {
+        var x_pos = hotbar_x + i * (slot_size + padding);
         var y_pos = hotbar_y;
 
-        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h)) {
+        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
             var item = oPlayer.inventory[i];
 
             if (item != noone) {
@@ -159,30 +162,24 @@ if (ui_open) {
 
 #region Mouse Right Click Transfer - Chest to Player
 if (ui_open && mouse_check_button_pressed(mb_right)) {
-    var slot_w = 64;
-    var slot_h = 32;
-    var padding = 4;
-    var chest_x = 64;
-    var chest_y = 64;
+    var mx = device_mouse_x_to_gui(0);
+    var my = device_mouse_y_to_gui(0);
 
     for (var i = 0; i < array_length(inventory); i++) {
         var row = i div 5;
         var col = i mod 5;
 
-        var x_pos = chest_x + col * (slot_w + padding);
-        var y_pos = chest_y + row * (slot_h + padding);
+        var x_pos = chest_x + col * (slot_size + padding);
+        var y_pos = chest_y + row * (slot_size + padding);
 
-        var mx = device_mouse_x_to_gui(0);
-        var my = device_mouse_y_to_gui(0);
-
-        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h)) {
+        if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
             var item = inventory[i];
 
             if (item != noone) {
                 // Right click, move 1 item
-                var single_item = item_create(item.name, 1); // include .data!
+                var single_item = item_create(item.name, 1);
                 
-                var added = oPlayer.inventory_add_item(single_item); // Assuming a similar function exists for player
+                var added = oPlayer.inventory_add_item(single_item);
                 
                 if (added) {
                     item.count -= 1;
@@ -213,9 +210,9 @@ if (ui_open && mouse_check_button_pressed(mb_left)) {
         for (var i = 0; i < array_length(inventory); i++) {
             var row = i div 5;
             var col = i mod 5;
-            var x_pos = chest_x + col * (slot_w + padding);
-            var y_pos = chest_y + row * (slot_h + padding);
-            if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h)) {
+            var x_pos = chest_x + col * (slot_size + padding);
+            var y_pos = chest_y + row * (slot_size + padding);
+            if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
                 if (inventory[i] != noone) {
                     dragging_item = inventory[i];
                     drag_origin_index = i;
@@ -231,9 +228,9 @@ if (ui_open && mouse_check_button_pressed(mb_left)) {
         for (var i = 0; i < array_length(inventory); i++) {
             var row = i div 5;
             var col = i mod 5;
-            var x_pos = chest_x + col * (slot_w + padding);
-            var y_pos = chest_y + row * (slot_h + padding);
-            if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_w, y_pos + slot_h)) {
+            var x_pos = chest_x + col * (slot_size + padding);
+            var y_pos = chest_y + row * (slot_size + padding);
+            if (point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size)) {
                 if (inventory[i] == noone) {
                     inventory[i] = dragging_item;
                 } else {
