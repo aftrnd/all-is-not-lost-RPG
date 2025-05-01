@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"itemGetData",
+  "%Name":"player_sate_default",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"itemGetData",
+  "name":"player_sate_default",
   "parent":{
     "name":"Scripts",
     "path":"folders/Scripts.yy",

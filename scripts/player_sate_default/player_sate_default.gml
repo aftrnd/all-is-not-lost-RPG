@@ -1,5 +1,5 @@
 
-function playerStateDefault(){
+function player_state_default(){
 	// PLAYER'S DEFAULT MOVEMENT
 	
 	//Set a debug state name
@@ -52,7 +52,7 @@ function playerStateDefault(){
 	// Change state
 	if(keyActivate) // Using the 'E' button set in oPlayer STEP event 
 	{
-		state = playerStateFrozen;
+		state = player_state_frozen;
 	}
 	
 	//PLAYER ANIMATION

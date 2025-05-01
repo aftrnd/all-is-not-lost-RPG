@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"chestTransfer",
+  "%Name":"player_state_frozen",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"chestTransfer",
+  "name":"player_state_frozen",
   "parent":{
     "name":"Scripts",
     "path":"folders/Scripts.yy",

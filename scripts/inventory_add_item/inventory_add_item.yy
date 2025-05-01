@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"inventoryAdd",
+  "%Name":"inventory_add_item",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"inventoryAdd",
+  "name":"inventory_add_item",
   "parent":{
     "name":"Scripts",
     "path":"folders/Scripts.yy",

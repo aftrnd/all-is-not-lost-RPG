@@ -14,7 +14,7 @@ spriteDefault = sPlayer;
 spriteFrozen = sPlayerFrozen;
 
 // Define initial state
-state = playerStateDefault;
+state = player_state_default;
 #endregion
 
 #region Properties

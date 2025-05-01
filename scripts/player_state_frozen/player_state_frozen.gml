@@ -1,6 +1,6 @@
 // Script assets have changed for v2.3.0 see
 // https://help.yoyogames.com/hc/en-us/articles/360005277377 for more information
-function playerStateFrozen(){
+function player_state_frozen(){
 	
 	// THIS IS A TEST STATE. THIS ONLY CHANGES THE SPRITE! + Gravity...
 	
@@ -28,7 +28,6 @@ function playerStateFrozen(){
 	// Change state
 	if(keyActivate)
 	{
-		state = playerStateDefault;
+		state = player_state_default;
 	}
-
 }

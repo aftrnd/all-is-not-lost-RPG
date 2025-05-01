@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"chestAdd",
+  "%Name":"item_create",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"chestAdd",
+  "name":"item_create",
   "parent":{
     "name":"Scripts",
     "path":"folders/Scripts.yy",

@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"playerStateFrozen",
+  "%Name":"transfer_item_from",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"playerStateFrozen",
+  "name":"transfer_item_from",
   "parent":{
     "name":"Scripts",
     "path":"folders/Scripts.yy",

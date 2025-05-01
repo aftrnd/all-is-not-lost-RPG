@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"itemGlobalDatabase",
+  "%Name":"item_db_init",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"itemGlobalDatabase",
+  "name":"item_db_init",
   "parent":{
     "name":"Scripts",
     "path":"folders/Scripts.yy",
