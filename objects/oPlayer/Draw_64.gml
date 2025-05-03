@@ -266,15 +266,12 @@ if (inventory_open) {
     var inv_x = (gui_width - inv_width) / 2;
     var inv_y = (gui_height - inv_height) / 2 - 30; // Slightly above center
     
-    // Draw inventory background with thick border
-    var border_thickness = 1; // Reduced border thickness to 1px
-    
     // Define title area height - consistent with chest inventory
     var title_area_height = 30;
     
-    // First draw the outer rectangle (border color)
-    draw_set_alpha(0.8);
-    draw_set_color(c_dkgray);
+    // Draw inventory background (filled)
+    draw_set_alpha(0.85);
+    draw_set_color(c_black);
     draw_roundrect_ext(
         inv_x - padding,
         inv_y - padding - title_area_height, // Extra space for title
@@ -285,17 +282,17 @@ if (inventory_open) {
         false
     );
     
-    // Then draw the inner rectangle (background color)
-    draw_set_alpha(0.85);
-    draw_set_color(c_black);
+    // Draw inventory border (outline only - maintains 1px when scaled)
+    draw_set_alpha(0.8);
+    draw_set_color(c_dkgray);
     draw_roundrect_ext(
-        inv_x - padding + border_thickness,
-        inv_y - padding - title_area_height + border_thickness,
-        inv_x + inv_width + padding - border_thickness,
-        inv_y + inv_height + padding - border_thickness,
-        corner_radius - border_thickness/2,
-        corner_radius - border_thickness/2,
-        false
+        inv_x - padding,
+        inv_y - padding - title_area_height, // Extra space for title
+        inv_x + inv_width + padding,
+        inv_y + inv_height + padding,
+        corner_radius,
+        corner_radius,
+        true
     );
     
     draw_set_alpha(1);
@@ -322,32 +319,21 @@ if (inventory_open) {
         var is_hovered = point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size);
         var slot_index = hotbar_size + i; // Actual inventory index (after hotbar)
         
-        // Draw slot with border using the same approach
+        // Draw slot background
+        draw_set_alpha(0.5);
+        draw_set_color(c_black);
+        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, 
+                          corner_radius/2, corner_radius/2, false);
+        
+        // Draw slot border (outline only - maintains 1px when scaled)
+        draw_set_alpha(0.9);
         if (is_hovered) {
-            // Outer rectangle (border color - white when hovered)
-            draw_set_alpha(0.9);
-            draw_set_color(c_white);
-            draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
-            
-            // Inner rectangle (background color)
-            draw_set_alpha(0.5);
-            draw_set_color(c_black);
-            draw_roundrect_ext(x_pos + border_thickness, y_pos + border_thickness, 
-                              x_pos + slot_size - border_thickness, y_pos + slot_size - border_thickness, 
-                              corner_radius/2 - border_thickness/2, corner_radius/2 - border_thickness/2, false);
+            draw_set_color(c_white); // White border when hovered
         } else {
-            // Outer rectangle (border color - dark gray when not hovered)
-            draw_set_alpha(0.9);
-            draw_set_color(c_dkgray);
-            draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
-            
-            // Inner rectangle (background color)
-            draw_set_alpha(0.5);
-            draw_set_color(c_black);
-            draw_roundrect_ext(x_pos + border_thickness, y_pos + border_thickness, 
-                              x_pos + slot_size - border_thickness, y_pos + slot_size - border_thickness, 
-                              corner_radius/2 - border_thickness/2, corner_radius/2 - border_thickness/2, false);
+            draw_set_color(c_dkgray); // Dark gray border normally
         }
+        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, 
+                          corner_radius/2, corner_radius/2, true);
         
         draw_set_alpha(1);
         
@@ -406,12 +392,9 @@ var hotbar_width = (slot_size + padding) * hotbar_size - padding;
 var hotbar_x = (gui_width - hotbar_width) / 2; // Center hotbar
 var hotbar_y = gui_height - slot_size - 20;
 
-// Draw hotbar background with thick border
-var border_thickness = 1; // Reduced border thickness to 1px
-
-// First draw the outer rectangle (border color)
-draw_set_alpha(0.8);
-draw_set_color(c_dkgray);
+// Draw hotbar background (single filled rectangle)
+draw_set_alpha(0.7);
+draw_set_color(c_black);
 draw_roundrect_ext(
     hotbar_x - padding,
     hotbar_y - padding,
@@ -422,17 +405,17 @@ draw_roundrect_ext(
     false
 );
 
-// Then draw the inner rectangle (background color)
-draw_set_alpha(0.7);
-draw_set_color(c_black);
+// Draw hotbar border (outline only - maintains 1px when scaled)
+draw_set_alpha(0.8);
+draw_set_color(c_dkgray);
 draw_roundrect_ext(
-    hotbar_x - padding + border_thickness,
-    hotbar_y - padding + border_thickness,
-    hotbar_x + hotbar_width + padding - border_thickness,
-    hotbar_y + slot_size + padding - border_thickness,
-    corner_radius - border_thickness/2,
-    corner_radius - border_thickness/2,
-    false
+    hotbar_x - padding,
+    hotbar_y - padding,
+    hotbar_x + hotbar_width + padding,
+    hotbar_y + slot_size + padding,
+    corner_radius,
+    corner_radius,
+    true
 );
 
 draw_set_alpha(1);
@@ -444,43 +427,37 @@ for (var i = 0; i < hotbar_size; i++) {
     var is_hovered = point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size);
     var is_selected = (variable_instance_exists(id, "selected_slot") && i == selected_slot) || (i == 0 && !variable_instance_exists(id, "selected_slot"));
 
-    // Draw slot with consistent border thickness
+    // Draw slot background
     if (is_selected) {
-        // Selected slot - yellow border
+        // Selected slot - black background with yellow outline
+        draw_set_alpha(0.5);
+        draw_set_color(c_black);
+        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
+        
+        // Yellow border (outline only - maintains 1px when scaled)
         draw_set_alpha(0.9);
         draw_set_color(c_yellow);
-        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
-        
-        // Inner rectangle
+        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, true);
+    } else if (is_hovered) {
+        // Hovered slot - black background with white outline
         draw_set_alpha(0.5);
         draw_set_color(c_black);
-        draw_roundrect_ext(x_pos + border_thickness, y_pos + border_thickness, 
-                          x_pos + slot_size - border_thickness, y_pos + slot_size - border_thickness, 
-                          corner_radius/2 - border_thickness/2, corner_radius/2 - border_thickness/2, false);
-    } else if (is_hovered) {
-        // Hovered slot - white border
+        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
+        
+        // White border (outline only - maintains 1px when scaled)
         draw_set_alpha(0.9);
         draw_set_color(c_white);
-        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
-        
-        // Inner rectangle
+        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, true);
+    } else {
+        // Normal slot - black background with dark gray outline
         draw_set_alpha(0.5);
         draw_set_color(c_black);
-        draw_roundrect_ext(x_pos + border_thickness, y_pos + border_thickness, 
-                          x_pos + slot_size - border_thickness, y_pos + slot_size - border_thickness, 
-                          corner_radius/2 - border_thickness/2, corner_radius/2 - border_thickness/2, false);
-    } else {
-        // Normal slot - dark gray border
+        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
+        
+        // Dark gray border (outline only - maintains 1px when scaled)
         draw_set_alpha(0.9);
         draw_set_color(c_dkgray);
-        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
-        
-        // Inner rectangle
-        draw_set_alpha(0.5);
-        draw_set_color(c_black);
-        draw_roundrect_ext(x_pos + border_thickness, y_pos + border_thickness, 
-                          x_pos + slot_size - border_thickness, y_pos + slot_size - border_thickness, 
-                          corner_radius/2 - border_thickness/2, corner_radius/2 - border_thickness/2, false);
+        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, true);
     }
     
     draw_set_alpha(1);

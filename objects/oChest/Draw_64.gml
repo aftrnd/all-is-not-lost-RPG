@@ -21,15 +21,12 @@ if (ui_open) {
     #endregion
 
     #region Draw Background Box
-    // Draw background with thick border
-    var border_thickness = 1; // Reduced border thickness to 1px
-    
     // Define title area height - consistent with player inventory
     var title_area_height = 30;
     
-    // First draw the outer rectangle (border color)
-    draw_set_alpha(0.8);
-    draw_set_color(c_dkgray);
+    // Draw background (filled rectangle)
+    draw_set_alpha(0.85);
+    draw_set_color(c_black);
     draw_roundrect_ext(
         chest_x - padding,
         chest_y - padding - title_area_height,
@@ -40,17 +37,17 @@ if (ui_open) {
         false
     );
     
-    // Then draw the inner rectangle (background color)
-    draw_set_alpha(0.85);
-    draw_set_color(c_black);
+    // Draw border (outline only - maintains 1px when scaled)
+    draw_set_alpha(0.8);
+    draw_set_color(c_dkgray);
     draw_roundrect_ext(
-        chest_x - padding + border_thickness,
-        chest_y - padding - title_area_height + border_thickness,
-        chest_x + box_w + padding - border_thickness,
-        chest_y + box_h + padding - border_thickness,
-        corner_radius - border_thickness/2,
-        corner_radius - border_thickness/2,
-        false
+        chest_x - padding,
+        chest_y - padding - title_area_height,
+        chest_x + box_w + padding,
+        chest_y + box_h + padding,
+        corner_radius,
+        corner_radius,
+        true
     );
     
     draw_set_alpha(1);
@@ -78,32 +75,21 @@ if (ui_open) {
 
         var is_hovered = point_in_rectangle(mx, my, x_pos, y_pos, x_pos + slot_size, y_pos + slot_size);
 
-        // Draw slot with consistent border thickness
+        // Draw slot background
+        draw_set_alpha(0.5);
+        draw_set_color(c_black);
+        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, 
+                          corner_radius/2, corner_radius/2, false);
+        
+        // Draw slot border (outline only - maintains 1px when scaled)
+        draw_set_alpha(0.9);
         if (is_hovered) {
-            // Hovered slot - white border
-            draw_set_alpha(0.9);
-            draw_set_color(c_white);
-            draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
-            
-            // Inner rectangle
-            draw_set_alpha(0.5);
-            draw_set_color(c_black);
-            draw_roundrect_ext(x_pos + border_thickness, y_pos + border_thickness, 
-                              x_pos + slot_size - border_thickness, y_pos + slot_size - border_thickness, 
-                              corner_radius/2 - border_thickness/2, corner_radius/2 - border_thickness/2, false);
+            draw_set_color(c_white); // White border when hovered
         } else {
-            // Normal slot - dark gray border
-            draw_set_alpha(0.9);
-            draw_set_color(c_dkgray);
-            draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, corner_radius/2, corner_radius/2, false);
-            
-            // Inner rectangle
-            draw_set_alpha(0.5);
-            draw_set_color(c_black);
-            draw_roundrect_ext(x_pos + border_thickness, y_pos + border_thickness, 
-                              x_pos + slot_size - border_thickness, y_pos + slot_size - border_thickness, 
-                              corner_radius/2 - border_thickness/2, corner_radius/2 - border_thickness/2, false);
+            draw_set_color(c_dkgray); // Dark gray border normally
         }
+        draw_roundrect_ext(x_pos, y_pos, x_pos + slot_size, y_pos + slot_size, 
+                          corner_radius/2, corner_radius/2, true);
         
         draw_set_alpha(1);
 
