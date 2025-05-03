@@ -1,3 +1,6 @@
+// INITIALIZE SETTINGS
+settings_load();
+
 // INITIALIZE ITEMS
 item_db_init()
 

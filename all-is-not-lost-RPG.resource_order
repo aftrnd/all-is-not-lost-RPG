@@ -22,6 +22,7 @@
     {"name":"item_db_init","order":4,"path":"scripts/item_db_init/item_db_init.yy",},
     {"name":"item_get_data","order":5,"path":"scripts/item_get_data/item_get_data.yy",},
     {"name":"player_state_frozen","order":1,"path":"scripts/player_state_frozen/player_state_frozen.yy",},
+    {"name":"settings_management","order":8,"path":"scripts/settings_management/settings_management.yy",},
     {"name":"transfer_item_from","order":7,"path":"scripts/transfer_item_from/transfer_item_from.yy",},
     {"name":"main_platform","order":6,"path":"sprites/main_platform/main_platform.yy",},
     {"name":"sApple","order":9,"path":"sprites/sApple/sApple.yy",},
