@@ -4,6 +4,8 @@
 #region Variables
 var mx = device_mouse_x_to_gui(0);
 var my = device_mouse_y_to_gui(0);
+var mx_room = mouse_x;
+var my_room = mouse_y;
 
 // UI dimensions
 var slot_size = 48;
@@ -230,6 +232,16 @@ if(drawDebugMenu = true)
 			draw_text(debug_x + padding + 70, log_top + (i * 16), log_message);
 		}
 	}
+	
+	// Draw cursor debug info - only shown when debug menu is open
+	draw_set_halign(fa_left);
+	draw_set_valign(fa_top);
+	draw_set_color(c_yellow);
+	draw_line(mx-15, my, mx+15, my);  // Horizontal line
+	draw_line(mx, my-15, mx, my+15);  // Vertical line
+	draw_text(mx+20, my, "GUI: " + string(mx) + "," + string(my));
+	draw_text(mx+20, my+20, "Room: " + string(mx_room) + "," + string(my_room));
+	draw_text(mx+20, my+40, "Click: " + string(mouse_check_button(mb_left)));
 	
 	// Restore original drawing properties
 	draw_set_font(orig_font);

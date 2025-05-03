@@ -24,4 +24,10 @@ use_gui_coords = false;
 
 // GUI coordinates (used when drawing to GUI)
 gui_x = x;
-gui_y = y; 
+gui_y = y;
+
+// Action state
+action_triggered = false;
+
+// Reference to parent controller
+parent_controller = noone; 

@@ -21,17 +21,26 @@ var button_right = bx + width/2;
 var button_top = by - height/2;
 var button_bottom = by + height/2;
 
+// Draw debug indicator for hitbox
+if (position_meeting(mx, my, id)) {
+    show_debug_message("Mouse is over button at: " + string(x) + "," + string(y));
+}
+
 // Check if mouse is over the button
 hover = (mx >= button_left && mx <= button_right && my >= button_top && my <= button_bottom);
+
+// Track action trigger state
+action_triggered = false;
 
 // Handle click
 if (hover && mouse_check_button_pressed(mb_left)) {
     clicked = true;
+    show_debug_message("BUTTON CLICKED: " + button_text);
 }
 
 // Execute action when button is released
 if (clicked && mouse_check_button_released(mb_left)) {
-    // Execute the button action
+    // Execute the button action based on the action type
     switch (button_action) {
         case "start":
             // Start the game - transition to first level
@@ -39,8 +48,15 @@ if (clicked && mouse_check_button_released(mb_left)) {
             break;
             
         case "quit":
-            // Quit the game
-            game_end();
+            // Signal to parent that the quit action was triggered
+            action_triggered = true;
+            show_debug_message("QUIT ACTION TRIGGERED");
+            break;
+            
+        case "resume":
+            // Signal to parent that the resume action was triggered
+            action_triggered = true;
+            show_debug_message("RESUME ACTION TRIGGERED");
             break;
     }
     

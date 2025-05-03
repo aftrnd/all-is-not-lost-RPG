@@ -1,8 +1,9 @@
-/// @description Draw Button on GUI
+/// @description Draw Button
 // You can write your code in this editor
 
-// Only draw in GUI layer if using GUI coordinates
-if (use_gui_coords) {
+// Only draw in regular Draw event if NOT using GUI coordinates
+// Now draw ALWAYS for debugging
+//if (!use_gui_coords) {
     // Determine button color based on state
     var button_color;
     if (clicked) {
@@ -23,11 +24,9 @@ if (use_gui_coords) {
     // Draw button
     draw_set_color(button_color);
     draw_set_alpha(1); // Ensure full opacity for button
-    draw_roundrect(gui_x - width/2, gui_y - height/2, gui_x + width/2, gui_y + height/2, false);
-    
-    // Draw button outline
+    draw_roundrect(x - width/2, y - height/2, x + width/2, y + height/2, false);
     draw_set_color(c_black);
-    draw_roundrect(gui_x - width/2, gui_y - height/2, gui_x + width/2, gui_y + height/2, true);
+    draw_roundrect(x - width/2, y - height/2, x + width/2, y + height/2, true);
     
     // Draw button text only if this is not a menu button (otherwise drawn by controller)
     if (!variable_instance_exists(id, "is_menu_button") || !is_menu_button) {
@@ -35,10 +34,7 @@ if (use_gui_coords) {
         draw_set_valign(fa_middle);
         draw_set_color(c_white); // Hardcode white instead of using text_color
         draw_set_alpha(1); // Ensure full opacity for text
-        draw_text(gui_x, gui_y, button_text);
-        
-        // Display debug info
-        show_debug_message("Drawing button text with color: WHITE");
+        draw_text(x, y, button_text);
     }
     
     // Restore previous draw settings
@@ -47,4 +43,4 @@ if (use_gui_coords) {
     draw_set_valign(prev_valign);
     draw_set_color(prev_color);
     draw_set_alpha(prev_alpha);
-} 
+//} 
