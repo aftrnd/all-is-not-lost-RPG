@@ -61,4 +61,4 @@ if (game_paused) {
     // Reactivate important objects
     instance_activate_object(oGameController);
     instance_activate_object(oButton);
-} 
+}

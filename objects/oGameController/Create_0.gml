@@ -9,10 +9,10 @@ ds_map_add(global.sign_texts, "warning", "Beware of the deep forest ahead...");
 ds_map_add(global.sign_texts, "hint", "Press [SPACE] to jump higher!");
 
 // IN-GAME MENU
-menu_open = false;  // Start with menu closed
-menu_alpha = 0;     // Start with no alpha
+menu_open = false;     // Start with menu closed
+menu_alpha = 0;        // Start with no alpha
 menu_fade_speed = 0.1;
-game_paused = false; // Track if game is paused
+game_paused = false;   // Track if game is paused
 
 // Menu buttons
 menu_buttons = ds_list_create();
@@ -20,7 +20,7 @@ resume_button = noone;
 quit_button = noone;
 
 // Button layout settings
-button_vertical_spacing = 80; // Fixed vertical spacing between buttons in pixels
+button_vertical_spacing = 25; // Changed from 20 to 50 to match oTitleScreen
 
 // Window size tracking for responsive UI
 last_window_width = display_get_gui_width();
@@ -97,7 +97,7 @@ create_menu_buttons = function() {
     ds_list_add(menu_buttons, resume_button);
     
     // Create Quit button (fixed distance below resume button)
-    var quit_button_y = first_button_y + button_vertical_spacing;
+    var quit_button_y = first_button_y + resume_button.height + button_vertical_spacing;
     quit_button = instance_create_layer(gui_width/2, quit_button_y, "Instances", oButton);
     with (quit_button) {
         button_text = "Quit to Title";
@@ -135,7 +135,7 @@ update_button_positions = function() {
     // Calculate vertical positions using fixed spacing
     var menu_title_y = gui_height * 0.25; // Menu title position
     var first_button_y = menu_title_y + 80; // First button below title
-    var second_button_y = first_button_y + button_vertical_spacing; // Fixed distance for second button
+    var second_button_y = first_button_y + resume_button.height + button_vertical_spacing; // Updated with button height
     
     // Update Resume button position
     if (instance_exists(resume_button)) {

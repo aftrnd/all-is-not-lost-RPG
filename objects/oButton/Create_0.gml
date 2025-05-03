@@ -7,7 +7,7 @@ button_action = "";  // What action this button performs
 
 // Button dimensions
 width = 200;
-height = 60;
+height = 30;
 
 // Button states
 hover = false;

@@ -8,8 +8,8 @@ title_font = fnt_body; // Use the body font
 
 // Button dimensions and states
 button_width = 200;
-button_height = 60;
-button_spacing = 20;
+button_height = 30;
+button_spacing = 25;
 
 // Button colors
 color_normal = c_gray;
