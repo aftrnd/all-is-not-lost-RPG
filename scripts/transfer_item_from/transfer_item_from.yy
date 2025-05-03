@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"transfer_item_from",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"transfer_item_from",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

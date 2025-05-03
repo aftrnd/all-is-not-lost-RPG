@@ -1,5 +1,4 @@
-/// @description Restarts Game
+/// @description Restart Game (Developer Only)
 // You can write your code in this editor
 
-// Exactly what it says
 game_restart();
