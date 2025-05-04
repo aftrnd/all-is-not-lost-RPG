@@ -11,8 +11,8 @@
   "name":"oTitleScreen",
   "overriddenProperties":[],
   "parent":{
-    "name":"Objects",
-    "path":"folders/Objects.yy",
+    "name":"Menu & Buttons",
+    "path":"folders/Objects/Menu & Buttons.yy",
   },
   "parentObjectId":null,
   "persistent":false,
