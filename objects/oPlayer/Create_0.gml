@@ -81,12 +81,12 @@ function debug_log(_message, _color = c_white) {
 #endregion
 
 #region Properties
-playerGravity = 0.25; // Global value for player's gravity. Higher is more gravity (Might make a global value)
-horizontalSpeed = 0; // Current horizontal speed
-verticalSpeed = 0; // Current vertical speed
-walkingSpeed = 1.45; // Speed the player walks
-jumpSpeed = -5.0; // Speed the player moves off the ground
-allowJump = 0; // Jump frame buffer
+// Movement properties for top-down RPG
+hspd = 0; // Horizontal speed (current)
+vspd = 0; // Vertical speed (current)
+move_speed = 2.0; // Base movement speed
+move_direction = 0; // Direction of movement
+facing_direction = 0; // Direction player is facing (for animations)
 #endregion
 
 #region Hotbar & Player Inventory

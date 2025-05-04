@@ -2,32 +2,20 @@
 // https://help.yoyogames.com/hc/en-us/articles/360005277377 for more information
 function player_state_frozen(){
 	
-	// THIS IS A TEST STATE. THIS ONLY CHANGES THE SPRITE! + Gravity...
+	// THIS IS A TEST STATE. THIS ONLY CHANGES THE SPRITE!
 	
 	// Set a debug state name
 	global.stateName = "Frozen!";
 	
-	sprite_index = (spriteFrozen);
+	// Set frozen sprite
+	sprite_index = spriteFrozen;
 	
-	// Simple gravity logic
-	verticalSpeed = verticalSpeed + playerGravity;
+	// No movement in frozen state
+	hspd = 0;
+	vspd = 0;
 	
-	// Moving the player vertically (with gravity)
-	if (place_meeting(x, y + verticalSpeed, oWall))
-	{
-		if (verticalSpeed > 0) allowJump = 5; // Buffer alowing jump to still occure
-		while (abs(verticalSpeed) > 0.1)
-		{
-			verticalSpeed *= 0.5;
-			if (!place_meeting(x, y + verticalSpeed, oWall)) y += verticalSpeed;
-		}
-		verticalSpeed = 0;
-	}
-	y += verticalSpeed;  // Change the CURRENT vertical speed
-	
-	// Change state
-	if(keyActivate)
-	{
+	// Change state back if activation key pressed again
+	if(keyActivate) {
 		state = player_state_default;
 	}
 }

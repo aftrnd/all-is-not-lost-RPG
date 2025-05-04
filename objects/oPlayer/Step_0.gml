@@ -29,10 +29,8 @@ playerY = floor(y);
 #endregion
 
 #region Keyboard Bindings
-keyRight = keyboard_check(vk_right);
-keyLeft = keyboard_check(vk_left);
-keyJump = keyboard_check_pressed(vk_space);
-keyActivate = keyboard_check_pressed(ord("E")); // Generic 'Activate' key...
+// Activation key
+keyActivate = keyboard_check_pressed(ord("E")); // Generic 'Activate' key
 
 // Toggle inventory with Tab
 if (keyboard_check_pressed(vk_tab)) {
