@@ -31,7 +31,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"sUtilityGameController",
+    "path":"sprites/sUtilityGameController/sUtilityGameController.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }

@@ -11,8 +11,8 @@
   "name":"oChest",
   "overriddenProperties":[],
   "parent":{
-    "name":"Objects",
-    "path":"folders/Objects.yy",
+    "name":"Interactable",
+    "path":"folders/Objects/Interactable.yy",
   },
   "parentObjectId":null,
   "persistent":false,
@@ -31,7 +31,7 @@
   "properties":[],
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
-  "solid":false,
+  "solid":true,
   "spriteId":{
     "name":"sChest",
     "path":"sprites/sChest/sChest.yy",

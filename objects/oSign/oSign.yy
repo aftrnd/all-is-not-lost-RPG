@@ -10,8 +10,8 @@
   "name":"oSign",
   "overriddenProperties":[],
   "parent":{
-    "name":"Objects",
-    "path":"folders/Objects.yy",
+    "name":"Interactable",
+    "path":"folders/Objects/Interactable.yy",
   },
   "parentObjectId":null,
   "persistent":false,

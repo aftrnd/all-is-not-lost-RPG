@@ -75,7 +75,7 @@ create_menu_buttons = function() {
     var first_button_y = menu_title_y + 80; // First button below title
     
     // Create Resume button
-    resume_button = instance_create_layer(gui_width/2, first_button_y, "Instances", oButton);
+    resume_button = instance_create_layer(gui_width/2, first_button_y, "Utilities", oButton);
     with (resume_button) {
         button_text = "Resume Game";
         button_action = "resume";
@@ -101,7 +101,7 @@ create_menu_buttons = function() {
     
     // Create Quit button (fixed distance below resume button)
     var quit_button_y = first_button_y + resume_button.height + button_vertical_spacing;
-    quit_button = instance_create_layer(gui_width/2, quit_button_y, "Instances", oButton);
+    quit_button = instance_create_layer(gui_width/2, quit_button_y, "Utilities", oButton);
     with (quit_button) {
         button_text = "Quit to Title";
         button_action = "quit";

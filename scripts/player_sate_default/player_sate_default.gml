@@ -39,9 +39,9 @@ function player_state_default(){
 	}
 	
 	// Horizontal Collision Check
-	if (place_meeting(x + hspd, y, oWall)) {
+	if (place_meeting(x + hspd, y, oUtilityWall)) {
 		// Move as close as possible to the wall
-		while (!place_meeting(x + sign(hspd), y, oWall)) {
+		while (!place_meeting(x + sign(hspd), y, oUtilityWall)) {
 			x += sign(hspd);
 		}
 		hspd = 0;
@@ -51,9 +51,9 @@ function player_state_default(){
 	x += hspd;
 	
 	// Vertical Collision Check
-	if (place_meeting(x, y + vspd, oWall)) {
+	if (place_meeting(x, y + vspd, oUtilityWall)) {
 		// Move as close as possible to the wall
-		while (!place_meeting(x, y + sign(vspd), oWall)) {
+		while (!place_meeting(x, y + sign(vspd), oUtilityWall)) {
 			y += sign(vspd);
 		}
 		vspd = 0;
@@ -66,47 +66,44 @@ function player_state_default(){
 	playerX = floor(x);
 	playerY = floor(y);
 	
-	// Change state if activation key pressed
-	if (keyActivate) {
-		state = player_state_frozen;
-	}
+	// PLAYER ANIMATION BASED ON NEW SPRITE ORGANIZATION
 	
-	// PLAYER ANIMATION
-	image_speed = 1;
+	// Define direction variables to track last direction
+	// 0 = right, 1 = up, 2 = left, 3 = down
+	var dir = 0;
 	
-	// If moving, play walking animation
-	if (hspd != 0 || vspd != 0) {
-		sprite_index = sPlayerRunning; // Assuming you have a running sprite
+	// Determine direction based on input or last facing direction
+	if (_input_h != 0 || _input_v != 0) {
+		// Determine primary direction based on input
+		// Priority: down > up > left > right (reverse drawing order)
+		if (_right && abs(_input_h) > abs(_input_v)) dir = 0;
+		else if (_up && abs(_input_v) >= abs(_input_h)) dir = 1;
+		else if (_left && abs(_input_h) > abs(_input_v)) dir = 2;
+		else if (_down && abs(_input_v) >= abs(_input_h)) dir = 3;
+		
+		// Use running animation with direction-specific frames
+		sprite_index = sPlayerRunning;
+		image_speed = 1;
+		
+		// Set frame range based on direction (each direction has 8 frames)
+		// Right: 0-7, Up: 8-15, Left: 16-23, Down: 24-31
+		image_index = dir * 8 + (current_time / 60) % 8;
 	} else {
-		sprite_index = sPlayer; // Idle sprite
+		// Idle animation - use single directional frame from sPlayer
+		sprite_index = sPlayer;
+		image_speed = 0;
+		
+		// Determine idle direction from last known facing direction
+		if (facing_direction >= 45 && facing_direction < 135) dir = 3; // Down
+		else if (facing_direction >= 135 && facing_direction < 225) dir = 2; // Left
+		else if (facing_direction >= 225 && facing_direction < 315) dir = 1; // Up
+		else dir = 0; // Right
+		
+		// Select correct idle frame (0: right, 1: up, 2: left, 3: down)
+		image_index = dir;
 	}
 	
-	// Flip sprite based on horizontal movement
-	if (hspd != 0) {
-		image_xscale = sign(hspd);
-	}
-	
-	// For RPG style, you might want to add directional sprites later
-	// This would replace the simple left/right flip above
-	// Example logic (comment out for now until you have directional sprites):
-	/*
-	// Determine sprite based on facing direction
-	if (abs(hspd) > 0 || abs(vspd) > 0) {
-		// Only change facing when moving
-		if (facing_direction >= 45 && facing_direction < 135) {
-			// Facing down
-			sprite_index = sPlayerDown;
-		} else if (facing_direction >= 135 && facing_direction < 225) {
-			// Facing left
-			sprite_index = sPlayerLeft;
-		} else if (facing_direction >= 225 && facing_direction < 315) {
-			// Facing up
-			sprite_index = sPlayerUp;
-		} else {
-			// Facing right
-			sprite_index = sPlayerRight;
-		}
-	}
-	*/
+	// Reset image_xscale since we're not flipping sprites anymore
+	image_xscale = 1;
 }
 

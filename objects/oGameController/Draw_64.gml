@@ -57,16 +57,26 @@ if (menu_open || menu_alpha > 0) {
         draw_set_halign(fa_center);
         draw_set_valign(fa_middle);
         draw_set_color(c_white); // Force white color
+        draw_set_font(fnt_body); // Set the font explicitly
+        
+        // Add debug info
+        show_debug_message("Menu alpha: " + string(menu_alpha));
+        show_debug_message("Resume button exists: " + string(instance_exists(resume_button)));
         
         // Draw resume button text
         if (instance_exists(resume_button)) {
+            show_debug_message("Drawing resume button text: " + resume_button.button_text + " at " + string(resume_button.gui_x) + "," + string(resume_button.gui_y));
             draw_text(resume_button.gui_x, resume_button.gui_y, resume_button.button_text);
         }
         
         // Draw quit button text
         if (instance_exists(quit_button)) {
+            show_debug_message("Drawing quit button text: " + quit_button.button_text + " at " + string(quit_button.gui_x) + "," + string(quit_button.gui_y));
             draw_text(quit_button.gui_x, quit_button.gui_y, quit_button.button_text);
         }
+    } else {
+        // Debug for when alpha is too low
+        show_debug_message("Menu alpha too low for text: " + string(menu_alpha));
     }
     
     // Restore previous draw settings

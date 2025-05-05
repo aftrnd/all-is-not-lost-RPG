@@ -6,12 +6,12 @@
   "name":"oApple",
   "overriddenProperties":[],
   "parent":{
-    "name":"Objects",
-    "path":"folders/Objects.yy",
+    "name":"Items",
+    "path":"folders/Objects/Items.yy",
   },
   "parentObjectId":{
-    "name":"oItemPickup",
-    "path":"objects/oItemPickup/oItemPickup.yy",
+    "name":"oUtilityPickup",
+    "path":"objects/oUtilityPickup/oUtilityPickup.yy",
   },
   "persistent":false,
   "physicsAngularDamping":0.1,

@@ -21,8 +21,6 @@ sign_time = 0;        // When it was read
 
 // Player States
 spriteDefault = sPlayer;
-spriteFrozen = sPlayerFrozen;
-
 // Define initial state
 state = player_state_default;
 
