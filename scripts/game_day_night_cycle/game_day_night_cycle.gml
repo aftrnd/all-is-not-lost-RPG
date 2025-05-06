@@ -117,59 +117,91 @@ function time_update_lighting() {
     var dusk_start = global.time_dusk_start;   // 6:00 PM
     var night_start = global.time_night_start; // 8:00 PM
     
+    // Use GameMaker color functions to define the base colors for each time of day
+    var day_color = c_white;                            // Pure white for day
+    var dawn_color_start = make_color_rgb(180, 120, 100); // Orangish at early dawn
+    var dawn_color_end = make_color_rgb(255, 220, 180);   // Warm sunrise light
+    var dusk_color_start = make_color_rgb(255, 200, 150);  // Golden hour
+    var dusk_color_end = make_color_rgb(180, 130, 200);    // Purple sunset
+    var night_color = make_color_rgb(32, 24, 89);       // Blueish night
+    
     // Handle brightness and color based on time of day
     if (time_val >= day_start && time_val < dusk_start) {
         // DAY - EXACTLY 1.0 brightness, no color tint (true neutral)
         global.time_brightness = 1.0;
-        global.time_color_tint = [1.0, 1.0, 1.0];
+        global.time_color_tint = [1.0, 1.0, 1.0]; // White/neutral
     }
     else if (time_val >= dawn_start && time_val < day_start) {
-        // DAWN - transition from night (0.5) to day (1.0)
+        // DAWN - transition from night to day
         var t = (time_val - dawn_start) / (day_start - dawn_start);
         
-        // Start from night brightness (0.5) and transition toward day (1.0)
         // First half: more orangish light (dawn)
         if (t < 0.5) {
             global.time_brightness = lerp(0.5, 0.75, t * 2); // First half: 0.5 to 0.75
+            
+            // Use color_lerp to transition between night and early dawn
+            var dawn_transition = merge_color(night_color, dawn_color_start, t * 2);
+            
+            // Convert to 0-1 range for the shader
             global.time_color_tint = [
-                1.0,
-                lerp(0.6, 0.8, t * 2),
-                lerp(0.6, 0.7, t * 2)
+                color_get_red(dawn_transition) / 255,
+                color_get_green(dawn_transition) / 255,
+                color_get_blue(dawn_transition) / 255
             ];
         } else {
             global.time_brightness = lerp(0.75, 1.0, (t - 0.5) * 2); // Second half: 0.75 to 1.0
+            
+            // Transition from early dawn to late dawn/sunrise
+            var dawn_transition = merge_color(dawn_color_start, dawn_color_end, (t - 0.5) * 2);
+            
+            // Convert to 0-1 range for the shader
             global.time_color_tint = [
-                1.0,
-                lerp(0.8, 1.0, (t - 0.5) * 2),
-                lerp(0.7, 1.0, (t - 0.5) * 2)
+                color_get_red(dawn_transition) / 255,
+                color_get_green(dawn_transition) / 255,
+                color_get_blue(dawn_transition) / 255
             ];
         }
     }
     else if (time_val >= dusk_start && time_val < night_start) {
-        // DUSK - transition from day (1.0) to night (0.5)
+        // DUSK - transition from day to night
         var t = (time_val - dusk_start) / (night_start - dusk_start);
         
-        // Start from day brightness (1.0) and transition toward night (0.5)
         if (t < 0.5) {
             global.time_brightness = lerp(1.0, 0.75, t * 2); // First half: 1.0 to 0.75
+            
+            // Transition from day to dusk
+            var dusk_transition = merge_color(day_color, dusk_color_start, t * 2);
+            
+            // Convert to 0-1 range for the shader
             global.time_color_tint = [
-                1.0,
-                lerp(1.0, 0.7, t * 2),
-                lerp(1.0, 0.5, t * 2)
+                color_get_red(dusk_transition) / 255,
+                color_get_green(dusk_transition) / 255,
+                color_get_blue(dusk_transition) / 255
             ];
         } else {
             global.time_brightness = lerp(0.75, 0.5, (t - 0.5) * 2); // Second half: 0.75 to 0.5
+            
+            // Transition from dusk to night
+            var dusk_transition = merge_color(dusk_color_start, dusk_color_end, (t - 0.5) * 2);
+            
+            // Convert to 0-1 range for the shader
             global.time_color_tint = [
-                lerp(1.0, 0.7, (t - 0.5) * 2),
-                lerp(0.7, 0.5, (t - 0.5) * 2),
-                lerp(0.5, 0.8, (t - 0.5) * 2)
+                color_get_red(dusk_transition) / 255,
+                color_get_green(dusk_transition) / 255,
+                color_get_blue(dusk_transition) / 255
             ];
         }
     }
     else {
         // NIGHT (after night_start or before dawn_start)
         global.time_brightness = 0.5;
-        global.time_color_tint = [0.7, 0.5, 0.8]; // Blueish tint
+        
+        // Convert night color to 0-1 range for the shader
+        global.time_color_tint = [
+            color_get_red(night_color) / 255,
+            color_get_green(night_color) / 255,
+            color_get_blue(night_color) / 255
+        ];
     }
 }
 
