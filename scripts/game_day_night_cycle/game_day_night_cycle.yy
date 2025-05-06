@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"game_day_night_cycle",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"game_day_night_cycle",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

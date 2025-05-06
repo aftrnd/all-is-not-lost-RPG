@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"transfer_item_from",
+  "%Name":"inventory_transfer_item",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"transfer_item_from",
+  "name":"inventory_transfer_item",
   "parent":{
     "name":"Scripts",
     "path":"folders/Scripts.yy",

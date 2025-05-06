@@ -5,6 +5,40 @@ draw_set_valign(fa_bottom);
 draw_set_colour(c_white); 
 draw_text(global.window_width -10, global.window_height - 10, "0.4.0 Pre-Alpha");
 
+// DISPLAY CURRENT TIME
+if (variable_global_exists("time_hours")) {
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_set_colour(c_white);
+    draw_set_font(fnt_body);
+    
+    // Format and display the time
+    var time_string = time_get_string();
+    var time_period = time_get_period();
+    
+    // Add simple background for readability
+    draw_set_alpha(0.5);
+    draw_set_colour(c_black);
+    draw_rectangle(10, 10, 120, 40, false);
+    
+    // Draw time text
+    draw_set_alpha(1.0);
+    draw_set_colour(c_white);
+    draw_text(15, 15, time_string);
+    
+    // Draw time period with color indication
+    var period_color = c_white;
+    switch (time_period) {
+        case "dawn":  period_color = make_color_rgb(255, 200, 150); break; // Orange-yellow
+        case "day":   period_color = c_yellow; break;  // Yellow
+        case "dusk":  period_color = make_color_rgb(255, 150, 100); break; // Orange-red
+        case "night": period_color = make_color_rgb(150, 150, 255); break; // Blue
+    }
+    
+    draw_set_colour(period_color);
+    draw_text(15, 30, string_upper(time_period));
+}
+
 // Get mouse position for tracking
 var mx = device_mouse_x_to_gui(0);
 var my = device_mouse_y_to_gui(0);

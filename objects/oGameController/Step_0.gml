@@ -1,5 +1,21 @@
-/// @description Handle menu input
+/// @description Handle menu input and update time
 // You can write your code in this editor
+
+// UPDATE TIME SYSTEM
+// Only update time when game is not paused
+if (!game_paused) {
+    time_update();
+    
+    // Time controls for testing & gameplay with smooth transitions
+    if (keyboard_check_pressed(ord("1"))) time_transition_to(6, 0);   // Dawn
+    if (keyboard_check_pressed(ord("2"))) time_transition_to(12, 0);  // Mid-day
+    if (keyboard_check_pressed(ord("3"))) time_transition_to(19, 0);  // Dusk
+    if (keyboard_check_pressed(ord("4"))) time_transition_to(22, 0);  // Night
+    
+    // Speed controls
+    if (keyboard_check_pressed(vk_add)) global.time_rate *= 2;        // Double speed
+    if (keyboard_check_pressed(vk_subtract)) global.time_rate *= 0.5; // Half speed
+}
 
 // Get mouse position for tracking (used throughout this event)
 var mx = device_mouse_x_to_gui(0);

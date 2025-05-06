@@ -1,6 +1,9 @@
 // INITIALIZE SETTINGS
 settings_load();
 
+// INITIALIZE TIME SYSTEM
+time_init();
+
 // INITIALIZE ITEMS
 item_db_init()
 
