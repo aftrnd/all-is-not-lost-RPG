@@ -176,6 +176,13 @@ if (show_settings) {
               close_x - close_size/3, close_y + close_size/3);
 }
 
+// Draw Copyright Text
+draw_set_font(fnt_body);
+draw_set_halign(fa_left);
+draw_set_valign(fa_bottom);
+draw_set_color(c_white);
+draw_text(10, display_get_gui_height() - 10, "Copyright 2025, Nick Jackson");
+
 // Restore previous draw settings
 draw_set_font(prev_font);
 draw_set_halign(prev_halign);
