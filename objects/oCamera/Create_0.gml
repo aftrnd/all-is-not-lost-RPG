@@ -7,6 +7,13 @@ default_resolution_height = 540;
 
 camera_scale = 1;
 
+// Camera position and dimension variables (source of truth)
+global.camera_view = view_camera[0];
+global.camera_x = 0;
+global.camera_y = 0;
+global.camera_width = default_resolution_width * camera_scale;
+global.camera_height = default_resolution_height * camera_scale;
+
 // Probably wont use this.. fucking stupid
 window_set_size(default_resolution_width , default_resolution_height);
 
