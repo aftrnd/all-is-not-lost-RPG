@@ -1,5 +1,3 @@
 /// @description Reset shader
-// Only reset if we previously set a shader
-if (variable_global_exists("time_brightness")) {
-    shader_reset();
-}
+// IMPORTANT: We now handle all day/night shader effects in oGameController
+// This event is no longer needed

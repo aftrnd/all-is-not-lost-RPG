@@ -1,5 +1,5 @@
 //
-// Day/Night cycle fragment shader - ENHANCED VERSION
+// Day/Night cycle fragment shader - TRUE NEUTRAL VERSION
 //
 varying vec2 v_vTexcoord;
 varying vec4 v_vColour;
@@ -10,18 +10,18 @@ uniform vec3 u_ColorTint;   // RGB color tint for different times (night=blue, d
 
 void main()
 {
-    // Get the base texture color
-    vec4 baseColor = texture2D(gm_BaseTexture, v_vTexcoord);
+    // Get the base texture color (original pixel)
+    vec4 baseColor = texture2D(gm_BaseTexture, v_vTexcoord) * v_vColour;
     
-    // Apply color tinting based on time of day
-    vec4 finalColor = baseColor * v_vColour;
+    // A direct neutral multiplier approach where:
+    // - When color tint is [1,1,1], no color change occurs
+    // - When brightness is 1.0, no brightness change occurs
     
-    // ENHANCED: Apply stronger color mixing for more visible effect
-    finalColor.rgb = mix(finalColor.rgb * u_ColorTint, finalColor.rgb, u_Brightness * 0.7);
-    
-    // ENHANCED: More dramatic brightness adjustment
-    finalColor.rgb *= max(u_Brightness, 0.2);
-    
-    // Output final color
-    gl_FragColor = finalColor;
+    // Output pixel = Original pixel × Color tint × Brightness
+    gl_FragColor = vec4(
+        baseColor.r * u_ColorTint.r * u_Brightness,
+        baseColor.g * u_ColorTint.g * u_Brightness,
+        baseColor.b * u_ColorTint.b * u_Brightness,
+        baseColor.a  // Alpha remains unchanged
+    );
 }

@@ -18,9 +18,12 @@ function time_init() {
         global.time_dusk_start = 18;      // 6:00 PM
         global.time_night_start = 20;     // 8:00 PM
         
-        // Shader control values
-        global.time_brightness = 1.0;     // Full brightness during day
+        // Shader control values - initialize to noon/day settings
+        global.time_brightness = 1.0;     // Exactly 1.0 for noon/day - no effect
         global.time_color_tint = [1.0, 1.0, 1.0]; // Neutral tint (RGB)
+        
+        // Surface for the day/night system
+        global.daynightSurface = -1;
         
         // Time transition variables
         global.time_transitioning = false;
@@ -108,55 +111,79 @@ function time_update_lighting() {
     var minute = global.time_minutes;
     var time_val = hour + (minute / 60); // Time as decimal (e.g., 6.5 = 6:30)
     
-    // Calculate brightness and color tint based on time of day
-    if (time_val >= global.time_dawn_start && time_val < global.time_day_start) {
-        // Dawn: Gradually transition from night to day
-        var t = (time_val - global.time_dawn_start) / (global.time_day_start - global.time_dawn_start);
-        global.time_brightness = 0.6 + (0.4 * t);
-        // Dawn color: strong orange/yellow tint transitioning to neutral
-        global.time_color_tint = [
-            1.0, 
-            0.7 + (0.3 * t), 
-            0.5 + (0.5 * t)
-        ];
-    }
-    else if (time_val >= global.time_day_start && time_val < global.time_dusk_start) {
-        // Daytime: Full brightness, no tint
+    // Define key time points
+    var dawn_start = global.time_dawn_start;   // 5:00 AM
+    var day_start = global.time_day_start;     // 7:00 AM
+    var dusk_start = global.time_dusk_start;   // 6:00 PM
+    var night_start = global.time_night_start; // 8:00 PM
+    
+    // Handle brightness and color based on time of day
+    if (time_val >= day_start && time_val < dusk_start) {
+        // DAY - EXACTLY 1.0 brightness, no color tint (true neutral)
         global.time_brightness = 1.0;
         global.time_color_tint = [1.0, 1.0, 1.0];
     }
-    else if (time_val >= global.time_dusk_start && time_val < global.time_night_start) {
-        // Dusk: Gradually transition from day to night
-        var t = (time_val - global.time_dusk_start) / (global.time_night_start - global.time_dusk_start);
-        global.time_brightness = 1.0 - (0.4 * t);
-        // Dusk color: strong orangish-red tint
-        global.time_color_tint = [
-            1.0,
-            0.6 - (0.2 * t),
-            0.4 - (0.2 * t)
-        ];
-    }
-    else {
-        // Night: Much darker with strong blue tint
-        // If close to dawn, start brightening
-        if (hour >= global.time_night_start || time_val < global.time_dawn_start) {
-            if (hour < global.time_dawn_start && hour >= 0) {
-                // Pre-dawn transition
-                var t = time_val / global.time_dawn_start;
-                global.time_brightness = 0.4 + (0.2 * t);
-                // Transition from night blue to dawn orange
-                global.time_color_tint = [
-                    0.5 + (0.5 * t),
-                    0.5 + (0.2 * t),
-                    1.0 - (0.5 * t)
-                ];
-            } else {
-                // Middle of night
-                global.time_brightness = 0.4;
-                global.time_color_tint = [0.5, 0.5, 1.0]; // Stronger blue tint
-            }
+    else if (time_val >= dawn_start && time_val < day_start) {
+        // DAWN - transition from night (0.5) to day (1.0)
+        var t = (time_val - dawn_start) / (day_start - dawn_start);
+        
+        // Start from night brightness (0.5) and transition toward day (1.0)
+        // First half: more orangish light (dawn)
+        if (t < 0.5) {
+            global.time_brightness = lerp(0.5, 0.75, t * 2); // First half: 0.5 to 0.75
+            global.time_color_tint = [
+                1.0,
+                lerp(0.6, 0.8, t * 2),
+                lerp(0.6, 0.7, t * 2)
+            ];
+        } else {
+            global.time_brightness = lerp(0.75, 1.0, (t - 0.5) * 2); // Second half: 0.75 to 1.0
+            global.time_color_tint = [
+                1.0,
+                lerp(0.8, 1.0, (t - 0.5) * 2),
+                lerp(0.7, 1.0, (t - 0.5) * 2)
+            ];
         }
     }
+    else if (time_val >= dusk_start && time_val < night_start) {
+        // DUSK - transition from day (1.0) to night (0.5)
+        var t = (time_val - dusk_start) / (night_start - dusk_start);
+        
+        // Start from day brightness (1.0) and transition toward night (0.5)
+        if (t < 0.5) {
+            global.time_brightness = lerp(1.0, 0.75, t * 2); // First half: 1.0 to 0.75
+            global.time_color_tint = [
+                1.0,
+                lerp(1.0, 0.7, t * 2),
+                lerp(1.0, 0.5, t * 2)
+            ];
+        } else {
+            global.time_brightness = lerp(0.75, 0.5, (t - 0.5) * 2); // Second half: 0.75 to 0.5
+            global.time_color_tint = [
+                lerp(1.0, 0.7, (t - 0.5) * 2),
+                lerp(0.7, 0.5, (t - 0.5) * 2),
+                lerp(0.5, 0.8, (t - 0.5) * 2)
+            ];
+        }
+    }
+    else {
+        // NIGHT (after night_start or before dawn_start)
+        global.time_brightness = 0.5;
+        global.time_color_tint = [0.7, 0.5, 0.8]; // Blueish tint
+    }
+}
+
+/// @function smoothstep(edge0, edge1, x)
+/// @description Smooth interpolation between edge0 and edge1
+/// @param {real} edge0 Lower edge
+/// @param {real} edge1 Upper edge
+/// @param {real} x Value to interpolate
+/// @returns {real} Smoothly interpolated value
+function smoothstep(edge0, edge1, x) {
+    // Clamp x to 0..1 range
+    x = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+    // Apply smoothstep formula: 3x^2 - 2x^3
+    return x * x * (3.0 - 2.0 * x);
 }
 
 /// @function time_get_string()

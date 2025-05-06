@@ -2,8 +2,30 @@
 
 // Only proceed if time system is initialized
 if (variable_global_exists("time_brightness")) {
-    // NOTE: Instead of creating a surface and drawing the application_surface
-    // we'll use shader_set and directly apply to all subsequent drawing
+    // For daytime (brightness exactly 1.0), skip shader effect entirely
+    if (global.time_brightness == 1.0 && 
+        global.time_color_tint[0] == 1.0 && 
+        global.time_color_tint[1] == 1.0 && 
+        global.time_color_tint[2] == 1.0) {
+        // Skip shader during pure daytime - render original colors
+        // Free surface if it exists to save memory
+        if (surface_exists(global.daynightSurface)) {
+            surface_free(global.daynightSurface);
+            global.daynightSurface = -1;
+        }
+        return;
+    }
+    
+    // Create a surface if needed
+    if (!surface_exists(global.daynightSurface)) {
+        global.daynightSurface = surface_create(view_wport[0], view_hport[0]);
+    }
+    
+    // Copy the application surface to our day/night surface
+    surface_set_target(global.daynightSurface);
+    draw_clear_alpha(c_black, 0); // Clear with transparency
+    draw_surface(application_surface, 0, 0);
+    surface_reset_target();
     
     // Set shader
     shader_set(shDayNightCycle);
@@ -19,21 +41,8 @@ if (variable_global_exists("time_brightness")) {
                          global.time_color_tint[1], 
                          global.time_color_tint[2]);
     
-    // Draw a full-screen rectangle that will be processed by the shader
-    // This preserves camera scaling
-    var _vw = view_wport[0];
-    var _vh = view_hport[0];
-    
-    // Save blend mode
-    var _blend = gpu_get_blendmode();
-    gpu_set_blendmode_ext(bm_dest_color, bm_src_color);
-    
-    draw_rectangle_color(0, 0, _vw, _vh, 
-                         c_white, c_white, c_white, c_white, 
-                         false);
-    
-    // Restore blend mode
-    gpu_set_blendmode(_blend);
+    // Draw our surface with the shader applied
+    draw_surface(global.daynightSurface, 0, 0);
     
     // Reset shader
     shader_reset();
