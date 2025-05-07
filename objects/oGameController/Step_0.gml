@@ -1,6 +1,20 @@
 /// @description Handle menu input and update time
 // You can write your code in this editor
 
+// EMERGENCY PLAYER RECOVERY SYSTEM
+// Press R to restore or create the player at the center of the screen
+if (keyboard_check_pressed(ord("R"))) {
+    show_debug_message("EMERGENCY RECOVERY ACTIVATED - Creating player at room center");
+    
+    // Use the ensure_player_exists function, placing at room center
+    ensure_player_exists(room_width/2, room_height/2);
+    
+    // Reset room transition variables
+    global.player_target_x = -1;
+    global.player_target_y = -1;
+    global.create_player_in_new_room = false;
+}
+
 // UPDATE TIME SYSTEM
 // Only update time when game is not paused
 if (!game_paused) {
@@ -77,4 +91,9 @@ if (game_paused) {
     // Reactivate important objects
     instance_activate_object(oGameController);
     instance_activate_object(oButton);
+}
+
+// Update room transitions if the system is initialized
+if (variable_global_exists("room_transition_state")) {
+    room_transition_update();
 }

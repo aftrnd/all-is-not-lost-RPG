@@ -381,4 +381,9 @@ if (mouse_check_button_pressed(mb_left)) {
 #endregion
 
 // Sets which state the player should be in
-script_execute(state);
+if (!freeze_state) {
+    script_execute(state);
+} else {
+    // Reset freeze_state after one frame
+    freeze_state = false;
+}

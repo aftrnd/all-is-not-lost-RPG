@@ -6,6 +6,18 @@
 playerX = 0;
 playerY = 0;
 
+// Room transition tracking
+was_persistent = persistent; // Store original persistence setting
+in_room_transition = false;  // Flag for tracking room transitions
+
+// Position monitoring for room transitions
+prev_monitor_x = x;
+prev_monitor_y = y;
+alarm_monitor_count = 0;
+
+// State control for room transitions
+freeze_state = false; // When true, don't execute the state in Step event
+
 // Developer Menu
 drawDebugMenu = false;
 debug_logs = ds_list_create(); // Store log messages

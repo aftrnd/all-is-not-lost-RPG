@@ -1,4 +1,4 @@
-/// @Resolution& Camera Management
+/// @description Resolution & Camera Management
 // You can write your code in this editor
 
 // Default windowed resolution (Window resolution = viewport resolution)

@@ -168,3 +168,8 @@ if (menu_open || menu_alpha > 0) {
     // Restore previous draw settings
     draw_set_alpha(prev_alpha);
 }
+
+// Draw room transition overlay if the system is initialized
+if (variable_global_exists("room_transition_state")) {
+    room_transition_draw();
+}

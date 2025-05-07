@@ -1,3 +1,7 @@
+// ENABLE DEBUG MODE FOR ROOM TRANSITIONS
+global.debug_mode = true;
+show_debug_message("==== GAME CONTROLLER INITIALIZED - DEBUG MODE: " + string(global.debug_mode) + " ====");
+
 // INITIALIZE SETTINGS
 settings_load();
 
