@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"Decoratives",
-    "path":"folders/Sprites/Decoratives.yy",
+    "name":"Decorative",
+    "path":"folders/Sprites/Decorative.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

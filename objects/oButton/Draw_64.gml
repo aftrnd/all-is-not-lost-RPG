@@ -36,9 +36,6 @@ if (use_gui_coords) {
         draw_set_color(c_white); // Hardcode white instead of using text_color
         draw_set_alpha(1); // Ensure full opacity for text
         draw_text(gui_x, gui_y, button_text);
-        
-        // Display debug info
-        show_debug_message("Drawing button text with color: WHITE");
     }
     
     // Restore previous draw settings

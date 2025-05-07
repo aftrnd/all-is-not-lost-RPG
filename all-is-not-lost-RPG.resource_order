@@ -1,10 +1,11 @@
 {
   "FolderOrderSettings":[
+    {"name":"Decorative","order":14,"path":"folders/Objects/Decorative.yy",},
     {"name":"Interactable","order":13,"path":"folders/Objects/Interactable.yy",},
     {"name":"Items","order":12,"path":"folders/Objects/Items.yy",},
     {"name":"Menu & Buttons","order":11,"path":"folders/Objects/Menu & Buttons.yy",},
     {"name":"Collision & Triggers","order":4,"path":"folders/Objects/Utilities/Collision & Triggers.yy",},
-    {"name":"Decoratives","order":1,"path":"folders/Sprites/Decoratives.yy",},
+    {"name":"Decorative","order":1,"path":"folders/Sprites/Decorative.yy",},
     {"name":"Interactable","order":17,"path":"folders/Sprites/Interactable.yy",},
     {"name":"Items","order":16,"path":"folders/Sprites/Items.yy",},
     {"name":"Player","order":2,"path":"folders/Sprites/Player.yy",},
@@ -18,6 +19,7 @@
     {"name":"oSword","order":1,"path":"objects/oSword/oSword.yy",},
     {"name":"oTitleScreen","order":1,"path":"objects/oTitleScreen/oTitleScreen.yy",},
     {"name":"oUtilityPickup","order":1,"path":"objects/oUtilityPickup/oUtilityPickup.yy",},
+    {"name":"rmLivingRoom","order":2,"path":"rooms/rmLivingRoom/rmLivingRoom.yy",},
     {"name":"rmTitleScreen","order":1,"path":"rooms/rmTitleScreen/rmTitleScreen.yy",},
     {"name":"chest_add_item","order":6,"path":"scripts/chest_add_item/chest_add_item.yy",},
     {"name":"game_day_night_cycle","order":9,"path":"scripts/game_day_night_cycle/game_day_night_cycle.yy",},
@@ -28,6 +30,7 @@
     {"name":"item_get_data","order":5,"path":"scripts/item_get_data/item_get_data.yy",},
     {"name":"settings_management","order":8,"path":"scripts/settings_management/settings_management.yy",},
     {"name":"sBedCovers_LightBlue","order":1,"path":"sprites/sBedCovers_LightBlue/sBedCovers_LightBlue.yy",},
+    {"name":"sDoor_Beige","order":8,"path":"sprites/sDoor_Beige/sDoor_Beige.yy",},
     {"name":"sFloor_Wood","order":2,"path":"sprites/sFloor_Wood/sFloor_Wood.yy",},
     {"name":"sPlayerRunning","order":4,"path":"sprites/sPlayerRunning/sPlayerRunning.yy",},
     {"name":"sRug_Beige","order":6,"path":"sprites/sRug_Beige/sRug_Beige.yy",},
@@ -38,5 +41,6 @@
     {"name":"sUtilityGameController","order":1,"path":"sprites/sUtilityGameController/sUtilityGameController.yy",},
     {"name":"sWall","order":7,"path":"sprites/sWall/sWall.yy",},
     {"name":"sWallBase","order":3,"path":"sprites/sWallBase/sWallBase.yy",},
+    {"name":"sWindow_Day_Night","order":9,"path":"sprites/sWindow_Day_Night/sWindow_Day_Night.yy",},
   ],
 }

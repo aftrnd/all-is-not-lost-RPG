@@ -25,4 +25,3 @@ window_set_position(
 
 // Apply camera view settings
 camera_set_view_size(global.camera_view, global.camera_width, global.camera_height);
-
