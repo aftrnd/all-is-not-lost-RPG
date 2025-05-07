@@ -1,3 +1,55 @@
+/// @description Apply day/night overlay FIRST, then UI on top
+
+// APPLY DAY/NIGHT EFFECT FIRST
+// Only proceed if time system is initialized
+if (variable_global_exists("time_brightness")) {
+    // For daytime (brightness exactly 1.0), skip shader effect entirely
+    if (global.time_brightness == 1.0 && 
+        global.time_color_tint[0] == 1.0 && 
+        global.time_color_tint[1] == 1.0 && 
+        global.time_color_tint[2] == 1.0) {
+        // Skip processing for pure daytime
+    } else {
+        // Get GUI dimensions
+        var gui_width = display_get_gui_width();
+        var gui_height = display_get_gui_height();
+        
+        // Create a full-screen colored rectangle that applies the tint
+        var night_overlay_alpha = 1 - global.time_brightness;
+        var r = 1 - global.time_color_tint[0];
+        var g = 1 - global.time_color_tint[1];
+        var b = 1 - global.time_color_tint[2];
+        
+        // More precise night color - calculate the inverse of our desired tint
+        var overlay_color = make_color_rgb(
+            r * 255,
+            g * 255,
+            b * 255
+        );
+        
+        // Save old blend mode
+        var old_blend_mode = gpu_get_blendmode();
+        
+        // Draw the overlay with subtractive blending to darken the screen
+        if (night_overlay_alpha > 0) {
+            gpu_set_blendmode(bm_subtract);
+            draw_set_alpha(night_overlay_alpha);
+            draw_rectangle_color(
+                0, 0, 
+                gui_width, gui_height,
+                overlay_color, overlay_color, overlay_color, overlay_color,
+                false
+            );
+            draw_set_alpha(1.0); // Reset alpha
+        }
+        
+        // Restore blend mode
+        gpu_set_blendmode(old_blend_mode);
+    }
+}
+
+// NOW DRAW ALL UI ELEMENTS ON TOP
+
 // BUILD VERSION
 draw_set_font(fnt_body);
 draw_set_halign(fa_right);
@@ -115,54 +167,4 @@ if (menu_open || menu_alpha > 0) {
     
     // Restore previous draw settings
     draw_set_alpha(prev_alpha);
-}
-
-/// @description Apply day/night overlay
-// This is identical to the previous code but in Draw_GUI event to ensure camera independence
-
-// Only proceed if time system is initialized
-if (variable_global_exists("time_brightness")) {
-    // For daytime (brightness exactly 1.0), skip shader effect entirely
-    if (global.time_brightness == 1.0 && 
-        global.time_color_tint[0] == 1.0 && 
-        global.time_color_tint[1] == 1.0 && 
-        global.time_color_tint[2] == 1.0) {
-        return; // Skip processing for pure daytime
-    }
-    
-    // Get GUI dimensions
-    var gui_width = display_get_gui_width();
-    var gui_height = display_get_gui_height();
-    
-    // Create a full-screen colored rectangle that applies the tint
-    var night_overlay_alpha = 1 - global.time_brightness;
-    var r = 1 - global.time_color_tint[0];
-    var g = 1 - global.time_color_tint[1];
-    var b = 1 - global.time_color_tint[2];
-    
-    // More precise night color - calculate the inverse of our desired tint
-    var overlay_color = make_color_rgb(
-        r * 255,
-        g * 255,
-        b * 255
-    );
-    
-    // Save old blend mode
-    var old_blend_mode = gpu_get_blendmode();
-    
-    // Draw the overlay with subtractive blending to darken the screen
-    if (night_overlay_alpha > 0) {
-        gpu_set_blendmode(bm_subtract);
-        draw_set_alpha(night_overlay_alpha);
-        draw_rectangle_color(
-            0, 0, 
-            gui_width, gui_height,
-            overlay_color, overlay_color, overlay_color, overlay_color,
-            false
-        );
-        draw_set_alpha(1.0); // Reset alpha
-    }
-    
-    // Restore blend mode
-    gpu_set_blendmode(old_blend_mode);
 }
