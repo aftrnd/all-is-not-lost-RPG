@@ -18,6 +18,12 @@ alarm_monitor_count = 0;
 // State control for room transitions
 freeze_state = false; // When true, don't execute the state in Step event
 
+// Initialize room transition system if it doesn't exist yet
+// This ensures the system is ready before any transitions occur
+if (!variable_global_exists("room_transition_state")) {
+    room_transition_init();
+}
+
 // Developer Menu
 drawDebugMenu = false;
 debug_logs = ds_list_create(); // Store log messages
