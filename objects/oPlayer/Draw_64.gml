@@ -68,13 +68,13 @@ if(drawDebugMenu = true)
 	// Calculate debug menu height based on content
 	var debug_height = 120;  // Base height for initial content
 	var ui_height = 16 * 3;  // UI flags (inventory, chest, sign)
-	var activity_height = 16 * 3;  // Activity section (header + 2 items)
-	var bottom_padding = 20;  // Extra padding at the bottom
+	var activity_height = 16 * 4;  // Activity section (header + 2 items) - increased by 1 line
+	var bottom_padding = 20;  // Increased bottom padding to ensure no cutoff
 	var log_height = 0;
 	
 	if (ds_list_size(debug_logs) > 0) {
 		var visible_logs = min(ds_list_size(debug_logs), debug_log_max);
-		log_height = visible_logs * 16 + 16 + 30; // 16px per line + header + title bar + extra space
+		log_height = visible_logs * 16 + 16 + 40 + 10; // Added 10px extra padding at bottom of console
 	}
 	
 	debug_height = debug_height + ui_height + activity_height + log_height + bottom_padding;
@@ -83,9 +83,11 @@ if(drawDebugMenu = true)
 	var gui_width = display_get_gui_width();
 	var gui_height = display_get_gui_height();
 	var padding = 10; // Common padding value
-	var debug_x = padding;
-	var debug_y = gui_height - debug_height - padding; // padding from bottom
-	var debug_width = 425;
+	var debug_x = padding; // 10px padding from left
+	
+	// Ensure the debug menu doesn't extend beyond the top of the screen
+	var debug_y = max(padding, gui_height - debug_height - padding); // 10px padding from bottom, but not above top padding
+	var debug_width = 400; // Reduced from 425 to 400 (25px less)
 	
 	// Main debug background
 	draw_set_colour(c_black);
@@ -307,8 +309,10 @@ if(drawDebugMenu = true)
 		draw_set_alpha(1);
 		draw_set_colour(c_white);
 		draw_set_halign(fa_center);
-		draw_text(debug_x + padding + (console_width / 2), log_top + 5, "GAME CONSOLE");
+		draw_set_valign(fa_middle);
+		draw_text(debug_x + padding + (console_width / 2), log_top + 9, "GAME CONSOLE");
 		draw_set_halign(fa_left);
+		draw_set_valign(fa_top);
 		
 		// Adjust log start position after title bar
 		log_top += 20;
@@ -331,14 +335,22 @@ if(drawDebugMenu = true)
 			
 			var _timestamp = _mins + ":" + _secs;
 			
-			// Draw timestamp and prompt
-			draw_set_colour(c_gray);
-			draw_text(debug_x + padding + 5, log_top + (i * 16), "[" + _timestamp + "] >");
+			// Calculate vertical position for centered text within its line
+			var line_height = 16;
+			var line_middle = log_top + (i * line_height) + (line_height / 2);
 			
-			// Draw the actual message
+			// Draw timestamp and prompt with middle vertical alignment
+			draw_set_colour(c_gray);
+			draw_set_valign(fa_middle);
+			draw_text(debug_x + padding + 5, line_middle, "[" + _timestamp + "] >");
+			
+			// Draw the actual message with middle vertical alignment
 			draw_set_colour(log_color);
-			draw_text(debug_x + padding + 70, log_top + (i * 16), log_message);
+			draw_text(debug_x + padding + 70, line_middle, log_message);
 		}
+		
+		// Reset alignment to default
+		draw_set_valign(fa_top);
 	}
 	
 	// Draw cursor debug info - only shown when debug menu is open
