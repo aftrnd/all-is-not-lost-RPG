@@ -92,6 +92,7 @@
     {"id":{"name":"sTree_Bonsai","path":"sprites/sTree_Bonsai/sTree_Bonsai.yy",},},
     {"id":{"name":"sUtilityCamera","path":"sprites/sUtilityCamera/sUtilityCamera.yy",},},
     {"id":{"name":"sUtilityGameController","path":"sprites/sUtilityGameController/sUtilityGameController.yy",},},
+    {"id":{"name":"sUtilityRoomTrigger","path":"sprites/sUtilityRoomTrigger/sUtilityRoomTrigger.yy",},},
     {"id":{"name":"sUtilityWall","path":"sprites/sUtilityWall/sUtilityWall.yy",},},
     {"id":{"name":"sWall","path":"sprites/sWall/sWall.yy",},},
     {"id":{"name":"sWallBase","path":"sprites/sWallBase/sWallBase.yy",},},

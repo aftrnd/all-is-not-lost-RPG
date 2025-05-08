@@ -40,8 +40,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"sUtilityWall",
-    "path":"sprites/sUtilityWall/sUtilityWall.yy",
+    "name":"sUtilityRoomTrigger",
+    "path":"sprites/sUtilityRoomTrigger/sUtilityRoomTrigger.yy",
   },
   "spriteMaskId":null,
   "visible":true,

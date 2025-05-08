@@ -43,6 +43,7 @@
     {"name":"sTable_Wood","order":4,"path":"sprites/sTable_Wood/sTable_Wood.yy",},
     {"name":"sTree_Bonsai","order":5,"path":"sprites/sTree_Bonsai/sTree_Bonsai.yy",},
     {"name":"sUtilityGameController","order":1,"path":"sprites/sUtilityGameController/sUtilityGameController.yy",},
+    {"name":"sUtilityRoomTrigger","order":1,"path":"sprites/sUtilityRoomTrigger/sUtilityRoomTrigger.yy",},
     {"name":"sWall","order":7,"path":"sprites/sWall/sWall.yy",},
     {"name":"sWallBase","order":3,"path":"sprites/sWallBase/sWallBase.yy",},
     {"name":"sWindow_Day_Night","order":9,"path":"sprites/sWindow_Day_Night/sWindow_Day_Night.yy",},
