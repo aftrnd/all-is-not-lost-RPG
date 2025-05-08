@@ -67,6 +67,7 @@
     {"id":{"name":"chest_add_item","path":"scripts/chest_add_item/chest_add_item.yy",},},
     {"id":{"name":"game_day_night_cycle","path":"scripts/game_day_night_cycle/game_day_night_cycle.yy",},},
     {"id":{"name":"game_day_night_update_sprite","path":"scripts/game_day_night_update_sprite/game_day_night_update_sprite.yy",},},
+    {"id":{"name":"game_debug_system","path":"scripts/game_debug_system/game_debug_system.yy",},},
     {"id":{"name":"game_room_transition_manager","path":"scripts/game_room_transition_manager/game_room_transition_manager.yy",},},
     {"id":{"name":"inventory_add_item","path":"scripts/inventory_add_item/inventory_add_item.yy",},},
     {"id":{"name":"inventory_transfer_item","path":"scripts/inventory_transfer_item/inventory_transfer_item.yy",},},

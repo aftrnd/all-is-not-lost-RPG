@@ -25,6 +25,7 @@
     {"name":"chest_add_item","order":6,"path":"scripts/chest_add_item/chest_add_item.yy",},
     {"name":"game_day_night_cycle","order":9,"path":"scripts/game_day_night_cycle/game_day_night_cycle.yy",},
     {"name":"game_day_night_update_sprite","order":10,"path":"scripts/game_day_night_update_sprite/game_day_night_update_sprite.yy",},
+    {"name":"game_debug_system","order":12,"path":"scripts/game_debug_system/game_debug_system.yy",},
     {"name":"game_room_transition_manager","order":11,"path":"scripts/game_room_transition_manager/game_room_transition_manager.yy",},
     {"name":"inventory_add_item","order":3,"path":"scripts/inventory_add_item/inventory_add_item.yy",},
     {"name":"inventory_transfer_item","order":7,"path":"scripts/inventory_transfer_item/inventory_transfer_item.yy",},

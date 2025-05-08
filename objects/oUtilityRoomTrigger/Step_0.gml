@@ -1,6 +1,10 @@
 /// @description Check for player collision
 // Check if player is colliding with this trigger
 
+// Update visibility based on debug settings
+// This ensures that when debug settings change, the trigger visibility updates immediately
+visible = global.debug_mode && global.debug_settings.show_triggers;
+
 // Only proceed if we haven't been triggered yet and we have a valid destination
 if (!triggered && destination_room != -1) {
     if (place_meeting(x, y, oPlayer)) {

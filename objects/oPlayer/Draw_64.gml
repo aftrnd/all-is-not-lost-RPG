@@ -16,6 +16,45 @@ var gui_width = display_get_gui_width();
 var gui_height = display_get_gui_height();
 #endregion
 
+#region Trigger Toggle Message
+// Display the trigger toggle message if timer is active
+if (trigger_toggle_timer > 0) {
+    // Store original drawing properties
+    var orig_font = draw_get_font();
+    var orig_halign = draw_get_halign();
+    var orig_valign = draw_get_valign();
+    var orig_color = draw_get_color();
+    var orig_alpha = draw_get_alpha();
+    
+    // Setup text drawing
+    draw_set_font(fnt_body);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    
+    // Calculate alpha based on timer (fade out effect)
+    var alpha = min(1, trigger_toggle_timer / 30);
+    draw_set_alpha(alpha);
+    
+    // Draw text shadow for better visibility
+    draw_set_color(c_black);
+    draw_text(gui_width/2 + 2, gui_height/3 + 2, trigger_toggle_message);
+    
+    // Draw the actual text
+    draw_set_color(trigger_toggle_color);
+    draw_text(gui_width/2, gui_height/3, trigger_toggle_message);
+    
+    // Decrease timer
+    trigger_toggle_timer--;
+    
+    // Restore original drawing properties
+    draw_set_font(orig_font);
+    draw_set_halign(orig_halign);
+    draw_set_valign(orig_valign);
+    draw_set_color(orig_color);
+    draw_set_alpha(orig_alpha);
+}
+#endregion
+
 #region Debug Menu
 if(drawDebugMenu = true)
 {
@@ -83,12 +122,81 @@ if(drawDebugMenu = true)
 	draw_set_colour(c_white); 
 	draw_text_transformed(debug_x + padding, debug_y + 82, "Player State: " +  _playerState, 1, 1, 0);
 	
+	// DEBUG SETTINGS
+	draw_set_colour(c_yellow);
+	draw_text(debug_x + padding, debug_y + 100, "Debug Settings:");
+
+	// Show triggers toggle
+	var toggle_color = debug_setting_get("show_triggers") ? c_lime : c_red;
+	var toggle_status = debug_setting_get("show_triggers") ? "[ON]" : "[OFF]";
+	draw_set_colour(toggle_color);
+	draw_text(debug_x + padding + 10, debug_y + 118, "Show Triggers: " + toggle_status);
+	
+	// Draw a toggle button beside the text
+	var button_x = debug_x + padding + 180;
+	var button_y = debug_y + 118;
+	var button_width = 30;
+	var button_height = 16;
+	
+	// Draw button background
+	draw_set_alpha(0.8);
+	draw_rectangle_color(
+	    button_x, button_y,
+	    button_x + button_width, button_y + button_height,
+	    toggle_color, toggle_color, toggle_color, toggle_color,
+	    false
+	);
+	
+	// Draw button outline
+	draw_set_alpha(1.0);
+	draw_rectangle_color(
+	    button_x, button_y,
+	    button_x + button_width, button_y + button_height,
+	    c_white, c_white, c_white, c_white,
+	    true
+	);
+	
+	// Draw button text
+	draw_set_color(c_black);
+	draw_set_halign(fa_center);
+	draw_set_valign(fa_middle);
+	draw_text(button_x + button_width / 2, button_y + button_height / 2, toggle_status);
+	draw_set_halign(fa_left);
+	draw_set_valign(fa_top);
+	draw_set_color(c_white);
+
+	// Mouse interactions for toggles
+	if (mouse_check_button_pressed(mb_left)) {
+		// Check if clicked on show_triggers toggle or button
+		if (point_in_rectangle(mx, my, debug_x + padding + 10, debug_y + 118, debug_x + padding + 200, debug_y + 134) ||
+		    point_in_rectangle(mx, my, button_x, button_y, button_x + button_width, button_y + button_height)) {
+			// Get current value
+			var current = debug_setting_get("show_triggers");
+			
+			// Toggle directly using struct variable
+			var new_value = !current;
+			variable_struct_set(global.debug_settings, "show_triggers", new_value);
+			
+			// Show toggle message
+			var status = new_value ? "ON" : "OFF";
+            var color = new_value ? c_lime : c_red;
+            trigger_toggle_message = "Room Triggers: " + status;
+            trigger_toggle_color = color;
+            trigger_toggle_timer = 90;
+            
+            // Force update all room trigger objects
+            with (oUtilityRoomTrigger) {
+                visible = global.debug_mode && global.debug_settings.show_triggers;
+            }
+		}
+	}
+	
 	// UI STATES
 	draw_set_colour(c_yellow);
-	draw_text(debug_x + padding, debug_y + 100, "UI State Flags:");
+	draw_text(debug_x + padding, debug_y + 136, "UI State Flags:");
 	draw_set_colour(c_white);
 	
-	var ui_y = debug_y + 118;
+	var ui_y = debug_y + 154;
 	// Player inventory state
 	var inv_color = inventory_open ? c_lime : c_gray;
 	draw_set_colour(inv_color);

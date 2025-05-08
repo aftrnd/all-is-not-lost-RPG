@@ -11,5 +11,13 @@
 //                         // Use this to adjust for sprite origin differences
 //                         // Example: If player appears too low, try y_offset of -12
 
+// Debug state tracking
+last_debug_state = debug_is_enabled();
+last_trigger_state = debug_setting_get("show_triggers");
+
+// Set initial visibility based on debug settings
+// Only visible if both debug mode AND show_triggers are enabled
+visible = global.debug_mode && global.debug_settings.show_triggers;
+
 // Internal flag to prevent multiple triggers
 triggered = false; 

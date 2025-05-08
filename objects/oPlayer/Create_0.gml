@@ -31,6 +31,18 @@ debug_log_max = 10; // Maximum number of logs to display
 debug_log_colors = ds_list_create(); // Store colors for each log entry
 debug_log_times = ds_list_create(); // Store timestamps for each log entry
 
+// Initialize global debug system
+game_debug_system_init();
+
+// Ensure debug menu and global debug mode are in sync
+// The drawDebugMenu should determine the global debug mode at startup
+global.debug_mode = drawDebugMenu;
+
+// Message display for debug feedback
+trigger_toggle_message = "";
+trigger_toggle_color = c_white;
+trigger_toggle_timer = 0;
+
 // Activity Tracking
 last_pickup = "None"; // Last item picked up
 pickup_time = 0;      // When it was picked up
