@@ -78,6 +78,7 @@
     {"id":{"name":"item_db_init","path":"scripts/item_db_init/item_db_init.yy",},},
     {"id":{"name":"item_get_data","path":"scripts/item_get_data/item_get_data.yy",},},
     {"id":{"name":"mob_pathfinding_init","path":"scripts/mob_pathfinding_init/mob_pathfinding_init.yy",},},
+    {"id":{"name":"mob_pathfinding","path":"scripts/mob_pathfinding/mob_pathfinding.yy",},},
     {"id":{"name":"player_sate_default","path":"scripts/player_sate_default/player_sate_default.yy",},},
     {"id":{"name":"settings_management","path":"scripts/settings_management/settings_management.yy",},},
     {"id":{"name":"shDayNightCycle","path":"shaders/shDayNightCycle/shDayNightCycle.yy",},},

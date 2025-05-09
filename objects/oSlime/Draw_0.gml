@@ -86,11 +86,89 @@ if (debug_enabled) {
         draw_text(mid_x, mid_y, string(floor(dist_to_player)) + "px");
     }
     
+    // Draw the pathfinding path if it exists and has points
+    if (path_exists(path) && path_get_number(path) > 1) {
+        // Draw the path with gradient colors
+        var path_points = path_get_number(path);
+        
+        for (var i = 0; i < path_points - 1; i++) {
+            // Get current and next points
+            var px1 = path_get_point_x(path, i);
+            var py1 = path_get_point_y(path, i);
+            var px2 = path_get_point_x(path, i + 1);
+            var py2 = path_get_point_y(path, i + 1);
+            
+            // Calculate color based on position in path (start to end gradient)
+            var progress = i / (path_points - 1);
+            
+            // Gradient from cyan at start to purple at end
+            var r = lerp(0, 192, progress);    // 0 to 192 (cyan to purple)
+            var g = lerp(192, 0, progress);    // 192 to 0 (cyan to purple)
+            var b = 255;                        // Always high blue component
+            
+            draw_set_color(make_color_rgb(r, g, b));
+            draw_set_alpha(0.7);
+            
+            // Draw line segment
+            draw_line_width(px1, py1, px2, py2, 2);
+            
+            // Draw point markers
+            if (i == 0) {
+                // First point (start) - larger green circle
+                draw_set_color(c_lime);
+                draw_set_alpha(0.8);
+                draw_circle(px1, py1, 4, false);
+            } else if (i == path_points - 2) {
+                // Last connection to endpoint
+                draw_set_color(c_fuchsia);
+                draw_set_alpha(0.8);
+                draw_circle(px2, py2, 4, false);
+            } else {
+                // Intermediary points - small dots
+                draw_set_color(c_white);
+                draw_set_alpha(0.6);
+                draw_circle(px1, py1, 2, false);
+            }
+        }
+        
+        // Draw text showing number of path points
+        draw_set_color(c_white);
+        draw_set_alpha(1.0);
+        draw_text(x + 15, y - 36, "Path: " + string(path_points) + " pts");
+    }
+    
     // Current state and distance info
     draw_set_color(c_white);
     draw_text(x, y - 24, state);
     if (player != noone) {
         draw_text(x, y - 12, "Dist: " + string(floor(dist_to_player)) + "px");
+    }
+    
+    // Draw memory status if applicable
+    if (using_memory) {
+        draw_set_color(c_orange);
+        draw_text(x, y - 36, "Memory: " + string(floor((memory_duration - (current_time - last_known_target_time)) / 1000)) + "s");
+        
+        // Draw last known position marker
+        if (variable_instance_exists(id, "last_known_target_x") && 
+            variable_instance_exists(id, "last_known_target_y")) {
+            // X marks the spot
+            var lkx = last_known_target_x;
+            var lky = last_known_target_y;
+            
+            draw_set_color(c_orange);
+            draw_set_alpha(0.8);
+            
+            // Draw X marker
+            var marker_size = 6;
+            draw_line_width(lkx - marker_size, lky - marker_size, 
+                           lkx + marker_size, lky + marker_size, 2);
+            draw_line_width(lkx + marker_size, lky - marker_size, 
+                           lkx - marker_size, lky + marker_size, 2);
+                           
+            // Draw circle around last known position
+            draw_circle(lkx, lky, 10, true);
+        }
     }
     
     // Draw direction indicator

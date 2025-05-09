@@ -35,6 +35,7 @@
     {"name":"item_db_init","order":4,"path":"scripts/item_db_init/item_db_init.yy",},
     {"name":"item_get_data","order":5,"path":"scripts/item_get_data/item_get_data.yy",},
     {"name":"mob_pathfinding_init","order":13,"path":"scripts/mob_pathfinding_init/mob_pathfinding_init.yy",},
+    {"name":"mob_pathfinding","order":14,"path":"scripts/mob_pathfinding/mob_pathfinding.yy",},
     {"name":"settings_management","order":8,"path":"scripts/settings_management/settings_management.yy",},
     {"name":"sBedCovers_LightBlue","order":1,"path":"sprites/sBedCovers_LightBlue/sBedCovers_LightBlue.yy",},
     {"name":"sDoor_Beige","order":8,"path":"sprites/sDoor_Beige/sDoor_Beige.yy",},
