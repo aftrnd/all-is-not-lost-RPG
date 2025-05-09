@@ -2,11 +2,11 @@
 // You can write your code in this editor
 
 // Movement properties
-spd = 0.5;               // Base movement speed (increased)
-chase_spd = 1.2;         // Speed when chasing player (increased significantly)
-detection_range = 128;   // Range to detect player (in pixels)
-chase_range = 20;        // Range to start chasing player directly
-avoid_range = 16;        // Range to start avoiding obstacles
+spd = 0.3;               // Base movement speed (increased)
+chase_spd = .75;         // Speed when chasing player (increased significantly)
+detection_range = 100;   // Range to detect player
+chase_range = 75;        // Range to start chasing player directly
+avoid_range = 50;        // Range to start avoiding obstacles
 
 // Velocity variables for collision handling
 hspd = 0;                // Horizontal speed (current)

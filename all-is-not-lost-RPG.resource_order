@@ -1,10 +1,10 @@
 {
   "FolderOrderSettings":[
     {"name":"Decorative","order":14,"path":"folders/Objects/Decorative.yy",},
-    {"name":"Mobs","order":15,"path":"folders/Objects/Mobs.yy",},
     {"name":"Interactable","order":13,"path":"folders/Objects/Interactable.yy",},
     {"name":"Items","order":12,"path":"folders/Objects/Items.yy",},
     {"name":"Menu & Buttons","order":11,"path":"folders/Objects/Menu & Buttons.yy",},
+    {"name":"Mobs","order":15,"path":"folders/Objects/Mobs.yy",},
     {"name":"Collision & Triggers","order":4,"path":"folders/Objects/Utilities/Collision & Triggers.yy",},
     {"name":"Decorative","order":1,"path":"folders/Sprites/Decorative.yy",},
     {"name":"Interactable","order":17,"path":"folders/Sprites/Interactable.yy",},

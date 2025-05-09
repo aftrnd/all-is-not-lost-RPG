@@ -32,5 +32,5 @@
     "path":"sprites/sUtilityWall/sUtilityWall.yy",
   },
   "spriteMaskId":null,
-  "visible":false,
+  "visible":true,
 }
