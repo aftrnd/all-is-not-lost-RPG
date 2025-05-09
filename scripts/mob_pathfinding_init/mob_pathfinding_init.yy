@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"mob_pathfinding_init",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"mob_pathfinding_init",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

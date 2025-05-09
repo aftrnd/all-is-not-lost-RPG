@@ -1,6 +1,7 @@
 {
   "FolderOrderSettings":[
     {"name":"Decorative","order":14,"path":"folders/Objects/Decorative.yy",},
+    {"name":"Mobs","order":15,"path":"folders/Objects/Mobs.yy",},
     {"name":"Interactable","order":13,"path":"folders/Objects/Interactable.yy",},
     {"name":"Items","order":12,"path":"folders/Objects/Items.yy",},
     {"name":"Menu & Buttons","order":11,"path":"folders/Objects/Menu & Buttons.yy",},
@@ -8,6 +9,7 @@
     {"name":"Decorative","order":1,"path":"folders/Sprites/Decorative.yy",},
     {"name":"Interactable","order":17,"path":"folders/Sprites/Interactable.yy",},
     {"name":"Items","order":16,"path":"folders/Sprites/Items.yy",},
+    {"name":"Mobs","order":19,"path":"folders/Sprites/Mobs.yy",},
     {"name":"Player","order":2,"path":"folders/Sprites/Player.yy",},
     {"name":"Utilities","order":3,"path":"folders/Sprites/Utilities.yy",},
     {"name":"Collision & Triggers","order":2,"path":"folders/Sprites/Utilities/Collision & Triggers.yy",},
@@ -32,6 +34,7 @@
     {"name":"item_create","order":2,"path":"scripts/item_create/item_create.yy",},
     {"name":"item_db_init","order":4,"path":"scripts/item_db_init/item_db_init.yy",},
     {"name":"item_get_data","order":5,"path":"scripts/item_get_data/item_get_data.yy",},
+    {"name":"mob_pathfinding_init","order":13,"path":"scripts/mob_pathfinding_init/mob_pathfinding_init.yy",},
     {"name":"settings_management","order":8,"path":"scripts/settings_management/settings_management.yy",},
     {"name":"sBedCovers_LightBlue","order":1,"path":"sprites/sBedCovers_LightBlue/sBedCovers_LightBlue.yy",},
     {"name":"sDoor_Beige","order":8,"path":"sprites/sDoor_Beige/sDoor_Beige.yy",},
