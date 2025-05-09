@@ -332,6 +332,29 @@ if (vspd != 0) {
 // Apply vertical movement only after collision check
 y += vspd;
 
+// Update facing direction based on movement
+// This is important for sprite flipping in the Draw event
+// NOTE: We determined that the sprite default orientation is facing RIGHT,
+// so the Draw event now flips only when facing left
+if (hspd != 0) {
+    // Set facing based on horizontal movement
+    // When moving right (positive hspd), face right
+    // When moving left (negative hspd), face left
+    facing_right = (hspd > 0);
+} else if (vspd != 0 && state == "chase") {
+    // Only update facing during vertical movement if actively chasing
+    // This helps maintain consistent direction when chasing player
+    var player = instance_nearest(x, y, oPlayer);
+    if (player != noone) {
+        // Face toward player's position
+        facing_right = (player.x > x);
+    }
+} else if (state == "wander" && move_dir != -1) {
+    // Update facing based on wander direction
+    // Right-side directions (between 270 and 90 degrees) should face right
+    facing_right = (move_dir < 90 || move_dir > 270);
+}
+
 // Final safety check - prevent getting stuck inside walls
 if (place_meeting(x, y, oUtilityWall)) {
     // Try to move out of the wall with increasing distance

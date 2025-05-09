@@ -16,6 +16,7 @@ vspd = 0;                // Vertical speed (current)
 move_dir = irandom(359);  // Random initial direction (0-359 degrees)
 change_dir_timer = 0;
 change_dir_delay = room_speed * irandom_range(1, 3); // Change direction every 1-3 seconds
+facing_right = false;     // Track facing direction for sprite flipping (false = left, true = right)
 
 // Pathfinding variables 
 path = path_add();        // Create a new path for the slime

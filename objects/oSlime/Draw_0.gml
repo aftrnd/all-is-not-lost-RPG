@@ -1,11 +1,20 @@
 /// @description Draw slime and debug information
 // You can write your code in this editor
 
-// Draw the sprite normally
-draw_self();
-
-// IMPORTANT: Only draw debug visuals when explicitly enabled
-// Multiple checks to ensure we respect the debug setting
+// Draw the sprite with appropriate flipping based on facing_right variable
+// CORRECTED: The sprite's default orientation must be facing RIGHT 
+// When facing left, we need to flip it horizontally
+draw_sprite_ext(
+    sprite_index,
+    image_index,
+    x,
+    y,
+    facing_right ? 1 : -1, // Completely inverted logic: right = normal, left = flipped
+    1, // No vertical flipping
+    0, // No rotation
+    image_blend,
+    image_alpha
+);
 
 // Skip all debug drawing if we're in the first few frames after room load
 // This prevents flashing of debug elements during transitions
@@ -90,6 +99,12 @@ if (debug_enabled) {
     draw_set_color(c_lime);
     draw_line(x, y, dir_x, dir_y);
     draw_circle(dir_x, dir_y, 2, false);
+    
+    // Also show facing direction
+    var facing_x = x + lengthdir_x(20, facing_right ? 0 : 180);
+    var facing_y = y;
+    draw_set_color(c_aqua);
+    draw_circle(facing_x, facing_y, 3, false);
     
     // Reset drawing properties
     draw_set_alpha(1.0);
