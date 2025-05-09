@@ -27,8 +27,16 @@ state = "wander";         // Current state: "wander", "chase", "idle"
 wander_pause_timer = 0;   // Timer for pausing during wandering
 wander_pause_duration = 0; // Duration to pause 
 
-// Debug visualization
-show_debug_ranges = true; // Enable visualization of detection ranges
+// Debug control variables
+room_entry_frames = 0;    // Used to prevent debug flashing during room transitions
+
+// Explicitly check and sync with global debug state (initializing if needed)
+if (!variable_global_exists("debug_mode")) {
+    if (script_exists(asset_get_index("game_debug_system_init"))) {
+        game_debug_system_init();
+        global.debug_mode = false; // Default to debug OFF
+    }
+}
 
 // Initialize random seed
 randomize(); 

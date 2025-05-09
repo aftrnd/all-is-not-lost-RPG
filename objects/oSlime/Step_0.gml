@@ -32,13 +32,31 @@ if (player != noone && dist_to_player <= detection_range && can_see_player) {
     
     // If detection was just made, we can provide a debug message
     if (state == "wander") {
-        show_debug_message("Slime detected player at distance: " + string(dist_to_player));
+        if (variable_global_exists("debug_mode") && global.debug_mode) {
+            var debug_msg = "Slime detected player at distance: " + string(dist_to_player);
+            show_debug_message(debug_msg);
+            
+            // Use player's debug log if available
+            var player_obj = instance_find(oPlayer, 0);
+            if (player_obj != noone && variable_instance_exists(player_obj, "debug_log")) {
+                player_obj.debug_log(debug_msg, c_yellow);
+            }
+        }
     }
 } else {
     // Player not detected, continue or return to wandering state
     if (state == "chase") {
         // Just lost detection of player
-        show_debug_message("Slime lost sight of player");
+        if (variable_global_exists("debug_mode") && global.debug_mode) {
+            var debug_msg = "Slime lost sight of player";
+            show_debug_message(debug_msg);
+            
+            // Use player's debug log if available
+            var player_obj = instance_find(oPlayer, 0);
+            if (player_obj != noone && variable_instance_exists(player_obj, "debug_log")) {
+                player_obj.debug_log(debug_msg, c_red);
+            }
+        }
         state = "wander";
         // Reset wandering parameters
         change_dir_timer = 0;

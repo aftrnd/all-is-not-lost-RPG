@@ -4,8 +4,43 @@
 // Draw the sprite normally
 draw_self();
 
-// Draw debug visualization if enabled
-if (show_debug_ranges) {
+// IMPORTANT: Only draw debug visuals when explicitly enabled
+// Multiple checks to ensure we respect the debug setting
+
+// Skip all debug drawing if we're in the first few frames after room load
+// This prevents flashing of debug elements during transitions
+if (variable_instance_exists(id, "room_entry_frames")) {
+    room_entry_frames += 1;
+    if (room_entry_frames < 3) { // Skip first 3 frames
+        exit; // Early exit - no debug visuals during initial frames
+    }
+} else {
+    room_entry_frames = 0;
+}
+
+// Thorough check for debug mode - multiple checks for reliability
+var debug_enabled = false;
+
+// Primary check: Global debug mode must exist and be TRUE
+if (variable_global_exists("debug_mode")) {
+    debug_enabled = global.debug_mode;
+    
+    // Secondary check: If player exists, sync with its debug menu
+    var player_obj = instance_find(oPlayer, 0);
+    if (player_obj != noone && variable_instance_exists(player_obj, "drawDebugMenu")) {
+        // Only show debug if BOTH global AND player debug are enabled
+        debug_enabled = debug_enabled && player_obj.drawDebugMenu;
+    }
+    
+    // Tertiary check: Debug settings must also allow it if they exist
+    if (variable_global_exists("debug_settings")) {
+        // We can require specific debug settings here
+        // This is future-proofing for more granular debug controls
+    }
+}
+
+// FINAL GATE: Only proceed if debug is 100% confirmed enabled
+if (debug_enabled) {
     // Find player
     var player = instance_nearest(x, y, oPlayer);
     var dist_to_player = infinity;
@@ -55,4 +90,8 @@ if (show_debug_ranges) {
     draw_set_color(c_lime);
     draw_line(x, y, dir_x, dir_y);
     draw_circle(dir_x, dir_y, 2, false);
+    
+    // Reset drawing properties
+    draw_set_alpha(1.0);
+    draw_set_color(c_white);
 } 
