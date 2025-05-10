@@ -2,18 +2,20 @@
 // You can write your code in this editor
 
 // Movement properties
-spd = 0.3;               // Base movement speed (increased)
+spd = 0.5;               // Base movement speed (increased)
 chase_spd = .75;         // Speed when chasing player (increased significantly)
 detection_range = 125;   // Range to detect player
-chase_range = 100;        // Range to start chasing player directly (reduced from 75)
+chase_range = 100;       // Range to start chasing player directly (reduced from 75)
 avoid_range = 50;        // Range to avoid obstacles
 
 // Movement smoothing
-movement_smoothing = true;   // Whether to apply smoothing (can be toggled)
-prev_hspd = 0;               // Previous horizontal speed for smoothing
-prev_vspd = 0;               // Previous vertical speed for smoothing
-direct_smooth_factor = 0.8;  // Direct chase smoothing (80% new, 20% old)
-path_smooth_factor = 0.7;    // Path following smoothing
+movement_smoothing = true;    // Whether to apply smoothing (can be toggled)
+prev_hspd = 0;                // Previous horizontal speed for smoothing
+prev_vspd = 0;                // Previous vertical speed for smoothing
+prev_hspd_stored = 0;         // Stored previous horizontal speed for consistent smoothing
+prev_vspd_stored = 0;         // Stored previous vertical speed for consistent smoothing
+direct_smooth_factor = 0.8;   // Direct chase smoothing (80% new, 20% old)
+path_smooth_factor = 0.7;     // Path following smoothing
 fallback_smooth_factor = 0.5; // Fallback movement smoothing (more aggressive)
 
 // Velocity variables for collision handling
@@ -41,6 +43,14 @@ search_attempts = 0;            // How many search attempts have been made
 max_search_attempts = 3;        // Maximum number of attempts before giving up
 seen_player = false;            // Whether the slime has seen the player
 going_to_last_seen = false;     // Whether the slime is currently going to the last seen position
+
+// Facing direction stability
+facing_stability_timer = 0;     // Counter for consistent movement in one direction
+facing_cooldown = 20;           // Frames to wait before allowing facing change (increased from 15)
+last_facing_change = current_time; // When facing direction last changed
+facing_change_debounce = false; // Whether we're in debounce mode for facing changes
+facing_history = array_create(5, false); // Track last 5 facing states for stability
+facing_history_index = 0;       // Current index in facing history array
 
 // State tracking
 state = "wander";         // Current state: "wander" or "chase"

@@ -211,6 +211,23 @@ if (debug_enabled) {
     draw_set_color(c_aqua);
     draw_circle(facing_x, facing_y, 3, false);
     
+    // Alternative more stable facing indicator that doesn't flicker
+    draw_set_color(c_navy);
+    draw_set_alpha(0.7);
+    var facing_dir = facing_right ? 0 : 180;
+    
+    // Draw a wedge/triangle indicating direction
+    var wedge_dist = 16;
+    var wedge_angle_half = 30;
+    var wedge_x1 = x + lengthdir_x(wedge_dist, facing_dir);
+    var wedge_y1 = y + lengthdir_y(wedge_dist, facing_dir);
+    var wedge_x2 = x + lengthdir_x(wedge_dist * 0.6, facing_dir - wedge_angle_half);
+    var wedge_y2 = y + lengthdir_y(wedge_dist * 0.6, facing_dir - wedge_angle_half);
+    var wedge_x3 = x + lengthdir_x(wedge_dist * 0.6, facing_dir + wedge_angle_half);
+    var wedge_y3 = y + lengthdir_y(wedge_dist * 0.6, facing_dir + wedge_angle_half);
+    
+    draw_triangle(wedge_x1, wedge_y1, wedge_x2, wedge_y2, wedge_x3, wedge_y3, false);
+    
     // Reset drawing properties
     draw_set_alpha(1.0);
     draw_set_color(c_white);

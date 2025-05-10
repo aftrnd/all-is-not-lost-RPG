@@ -25,18 +25,15 @@ hspd = 0;
 vspd = 0;
 
 // Store previous speeds for smoothing
+prev_hspd_stored = prev_hspd;
+prev_vspd_stored = prev_vspd;
 prev_hspd = hspd;
 prev_vspd = vspd;
 
 // STATE MANAGEMENT - Determine current state
 if (player != noone) {
-    // Update player position memory any time they're visible, regardless of range
-    if (can_see_player) {
-        // Always update last known position when player is visible
-        mob_pathfinding_set_last_known_position(player.x, player.y);
-        seen_player = true; // Mark that we've seen the player
-    }
-
+    // Player position memory is already handled at the start of the step event
+    
     if (can_see_player && dist_to_player <= chase_range) {
         // Player is visible and within chase range - enter chase state
         if (state != "chase") {
@@ -173,8 +170,8 @@ if (state == "chase") {
             
             // Apply smoothing if enabled
             if (movement_smoothing) {
-                hspd = raw_hspd * direct_smooth_factor + prev_hspd * (1 - direct_smooth_factor);
-                vspd = raw_vspd * direct_smooth_factor + prev_vspd * (1 - direct_smooth_factor);
+                hspd = raw_hspd * direct_smooth_factor + prev_hspd_stored * (1 - direct_smooth_factor);
+                vspd = raw_vspd * direct_smooth_factor + prev_vspd_stored * (1 - direct_smooth_factor);
             } else {
                 hspd = raw_hspd;
                 vspd = raw_vspd;
@@ -235,8 +232,8 @@ if (state == "chase") {
                 
                 // Apply smoothing if enabled
                 if (movement_smoothing) {
-                    hspd = move_data.hspd * path_smooth_factor + prev_hspd * (1 - path_smooth_factor);
-                    vspd = move_data.vspd * path_smooth_factor + prev_vspd * (1 - path_smooth_factor);
+                    hspd = move_data.hspd * path_smooth_factor + prev_hspd_stored * (1 - path_smooth_factor);
+                    vspd = move_data.vspd * path_smooth_factor + prev_vspd_stored * (1 - path_smooth_factor);
                 } else {
                     hspd = move_data.hspd;
                     vspd = move_data.vspd;
@@ -292,8 +289,8 @@ if (state == "chase") {
                     var raw_vspd = lengthdir_y(chase_spd * 0.8, dir_to_target);
                     
                     if (movement_smoothing) {
-                        hspd = raw_hspd * fallback_smooth_factor + prev_hspd * (1 - fallback_smooth_factor);
-                        vspd = raw_vspd * fallback_smooth_factor + prev_vspd * (1 - fallback_smooth_factor);
+                        hspd = raw_hspd * fallback_smooth_factor + prev_hspd_stored * (1 - fallback_smooth_factor);
+                        vspd = raw_vspd * fallback_smooth_factor + prev_vspd_stored * (1 - fallback_smooth_factor);
                     } else {
                         hspd = raw_hspd;
                         vspd = raw_vspd;
@@ -402,8 +399,8 @@ if (state == "chase") {
                 
                 // Apply smoothing if enabled
                 if (movement_smoothing) {
-                    hspd = move_data.hspd * path_smooth_factor + prev_hspd * (1 - path_smooth_factor);
-                    vspd = move_data.vspd * path_smooth_factor + prev_vspd * (1 - path_smooth_factor);
+                    hspd = move_data.hspd * path_smooth_factor + prev_hspd_stored * (1 - path_smooth_factor);
+                    vspd = move_data.vspd * path_smooth_factor + prev_vspd_stored * (1 - path_smooth_factor);
                 } else {
                     hspd = move_data.hspd;
                     vspd = move_data.vspd;
@@ -432,8 +429,8 @@ if (state == "chase") {
                     
                     if (movement_smoothing) {
                         var direct_smooth = 0.5; // Moderate smoothing
-                        hspd = raw_hspd * direct_smooth + prev_hspd * (1 - direct_smooth);
-                        vspd = raw_vspd * direct_smooth + prev_vspd * (1 - direct_smooth);
+                        hspd = raw_hspd * direct_smooth + prev_hspd_stored * (1 - direct_smooth);
+                        vspd = raw_vspd * direct_smooth + prev_vspd_stored * (1 - direct_smooth);
                     } else {
                         hspd = raw_hspd;
                         vspd = raw_vspd;
@@ -446,46 +443,78 @@ if (state == "chase") {
                 } else {
                     // Try obstacle avoidance if direct path isn't clear
                     var found_direction = false;
+                    var best_angle = 0;
+                    var max_clear_distance = 0;
+                    
+                    // Try to find the direction with the most clearance
                     var test_angles = [0, 45, -45, 90, -90, 135, -135, 180];
                     
                     for (var i = 0; i < array_length(test_angles); i++) {
                         var test_angle = test_angles[i];
-                        var test_x = x + lengthdir_x(32, test_angle);
-                        var test_y = y + lengthdir_y(32, test_angle);
+                        var max_test_distance = 48; // Test further
+                        var clear_distance = 0;
                         
-                        if (!collision_line(x, y, test_x, test_y, oUtilityWall, false, true)) {
-                            // Found a clear direction
-                            var raw_hspd = lengthdir_x(chase_spd * 0.75, test_angle);
-                            var raw_vspd = lengthdir_y(chase_spd * 0.75, test_angle);
+                        // Check how far we can go in this direction
+                        for (var dist = 8; dist <= max_test_distance; dist += 8) {
+                            var test_x = x + lengthdir_x(dist, test_angle);
+                            var test_y = y + lengthdir_y(dist, test_angle);
                             
-                            if (movement_smoothing) {
-                                var avoidance_smooth = 0.7; // More responsive
-                                hspd = raw_hspd * avoidance_smooth + prev_hspd * (1 - avoidance_smooth);
-                                vspd = raw_vspd * avoidance_smooth + prev_vspd * (1 - avoidance_smooth);
-                            } else {
-                                hspd = raw_hspd;
-                                vspd = raw_vspd;
+                            if (collision_line(x, y, test_x, test_y, oUtilityWall, false, true)) {
+                                break;
                             }
-                            
+                            clear_distance = dist;
+                        }
+                        
+                        // If this direction has more clearance than previous best
+                        if (clear_distance > max_clear_distance) {
+                            max_clear_distance = clear_distance;
+                            best_angle = test_angle;
                             found_direction = true;
-                            break;
                         }
                     }
                     
-                    // If still stuck, try a random direction
-                    if (!found_direction) {
+                    if (found_direction) {
+                        // Use the direction with the most clearance
+                        var raw_hspd = lengthdir_x(chase_spd * 0.75, best_angle);
+                        var raw_vspd = lengthdir_y(chase_spd * 0.75, best_angle);
+                        
+                        // Preserve facing during obstacle avoidance if moving sideways
+                        var facing_preserving_angle = abs(best_angle);
+                        if (facing_preserving_angle >= 45 && facing_preserving_angle <= 135) {
+                            // Moving mostly vertically, don't change facing
+                            last_facing_change = current_time + 15; // Extended cooldown
+                        }
+                        
+                        if (movement_smoothing) {
+                            var avoidance_smooth = 0.5; // Less responsive, smoother movement
+                            hspd = raw_hspd * avoidance_smooth + prev_hspd_stored * (1 - avoidance_smooth);
+                            vspd = raw_vspd * avoidance_smooth + prev_vspd_stored * (1 - avoidance_smooth);
+                        } else {
+                            hspd = raw_hspd;
+                            vspd = raw_vspd;
+                        }
+                        
+                        // Debug obstacle avoidance
+                        if (variable_global_exists("debug_mode") && global.debug_mode && (path_update_timer % 30 == 0)) {
+                            show_debug_message("AVOIDANCE: Using direction with most clearance: " + string(best_angle) + "°, clearance: " + string(max_clear_distance));
+                        }
+                    } else {
+                        // If still stuck, try a random direction
                         var random_dir = irandom(359);
                         var raw_hspd = lengthdir_x(chase_spd * 0.5, random_dir);
                         var raw_vspd = lengthdir_y(chase_spd * 0.5, random_dir);
                         
                         if (movement_smoothing) {
                             var random_smooth = 0.8; // Very responsive for escaping
-                            hspd = raw_hspd * random_smooth + prev_hspd * (1 - random_smooth);
-                            vspd = raw_vspd * random_smooth + prev_vspd * (1 - random_smooth);
+                            hspd = raw_hspd * random_smooth + prev_hspd_stored * (1 - random_smooth);
+                            vspd = raw_vspd * random_smooth + prev_vspd_stored * (1 - random_smooth);
                         } else {
                             hspd = raw_hspd;
                             vspd = raw_vspd;
                         }
+                        
+                        // Prevent facing changes during random movement
+                        last_facing_change = current_time + 20; // Extra long cooldown
                         
                         // Debug random movement
                         if (variable_global_exists("debug_mode") && global.debug_mode) {
@@ -542,8 +571,8 @@ if (state == "chase") {
                 // Apply smoothing for wander movement
                 if (movement_smoothing) {
                     var wander_smoothing = 0.3; // Low value for very smooth wandering
-                    hspd = raw_hspd * wander_smoothing + prev_hspd * (1 - wander_smoothing);
-                    vspd = raw_vspd * wander_smoothing + prev_vspd * (1 - wander_smoothing);
+                    hspd = raw_hspd * wander_smoothing + prev_hspd_stored * (1 - wander_smoothing);
+                    vspd = raw_vspd * wander_smoothing + prev_vspd_stored * (1 - wander_smoothing);
                 } else {
                     hspd = raw_hspd;
                     vspd = raw_vspd;
@@ -564,8 +593,8 @@ if (state == "chase") {
                     // Apply sharper turn for obstacles (more responsive)
                     if (movement_smoothing) {
                         var bounce_smoothing = 0.6; // Higher value for more responsive obstacle avoidance
-                        hspd = raw_hspd * bounce_smoothing + prev_hspd * (1 - bounce_smoothing);
-                        vspd = raw_vspd * bounce_smoothing + prev_vspd * (1 - bounce_smoothing);
+                        hspd = raw_hspd * bounce_smoothing + prev_hspd_stored * (1 - bounce_smoothing);
+                        vspd = raw_vspd * bounce_smoothing + prev_vspd_stored * (1 - bounce_smoothing);
                     } else {
                         hspd = raw_hspd;
                         vspd = raw_vspd;
@@ -579,48 +608,24 @@ if (state == "chase") {
     }
 }
 
-// Pre-check for collisions - do not allow movement that would cause a collision
-// This extra check prevents attempting to move into walls in the first place
-
-// Check horizontal movement for potential collision
-if (place_meeting(x + hspd, y, oUtilityWall)) {
-    // Will hit a wall horizontally, reduce speed until safe
-    var safe_hspd = hspd;
-    while (place_meeting(x + safe_hspd, y, oUtilityWall)) {
-        safe_hspd *= 0.5; // Cut speed in half
-        if (abs(safe_hspd) < 0.1) {
-            safe_hspd = 0; // If very small, just stop
-            break;
-        }
-    }
-    hspd = safe_hspd;
-}
-
-// Check vertical movement for potential collision
-if (place_meeting(x, y + vspd, oUtilityWall)) {
-    // Will hit a wall vertically, reduce speed until safe
-    var safe_vspd = vspd;
-    while (place_meeting(x, y + safe_vspd, oUtilityWall)) {
-        safe_vspd *= 0.5; // Cut speed in half
-        if (abs(safe_vspd) < 0.1) {
-            safe_vspd = 0; // If very small, just stop
-            break;
-        }
-    }
-    vspd = safe_vspd;
-}
-
-// === MAIN COLLISION HANDLING ===
-// Exactly matching player_state_default collision
-
+// === IMPROVED PIXEL-PERFECT COLLISION HANDLING ===
 // Horizontal Collision Check - Pixel perfect approach
 if (hspd != 0) {
     if (place_meeting(x + hspd, y, oUtilityWall)) {
         // Move as close as possible to the wall
-        while (!place_meeting(x + sign(hspd), y, oUtilityWall)) {
-            x += sign(hspd);
+        var step_size = sign(hspd);
+        var iterations = 0;
+        var max_iterations = ceil(abs(hspd)) + 2; // Add buffer to prevent infinite loops
+        
+        while (!place_meeting(x + step_size, y, oUtilityWall) && iterations < max_iterations) {
+            x += step_size;
+            iterations++;
         }
+        
         hspd = 0; // Stop horizontal movement completely
+        
+        // When hitting a wall, don't change facing for a while
+        last_facing_change = current_time + 30; // Extended cooldown to prevent flickering
     }
 }
 
@@ -631,9 +636,15 @@ x += hspd;
 if (vspd != 0) {
     if (place_meeting(x, y + vspd, oUtilityWall)) {
         // Move as close as possible to the wall
-        while (!place_meeting(x, y + sign(vspd), oUtilityWall)) {
-            y += sign(vspd);
+        var step_size = sign(vspd);
+        var iterations = 0;
+        var max_iterations = ceil(abs(vspd)) + 2; // Add buffer to prevent infinite loops
+        
+        while (!place_meeting(x, y + step_size, oUtilityWall) && iterations < max_iterations) {
+            y += step_size;
+            iterations++;
         }
+        
         vspd = 0; // Stop vertical movement completely
     }
 }
@@ -641,24 +652,154 @@ if (vspd != 0) {
 // Apply vertical movement only after collision check
 y += vspd;
 
-// Update facing direction based on movement
+// Store current movement direction for stability
+var current_movement_dir = -1;
+if (hspd != 0 || vspd != 0) {
+    current_movement_dir = point_direction(0, 0, hspd, vspd);
+}
+
+// Facing direction stability variables - these should be initialized in Create event
+if (!variable_instance_exists(id, "facing_stability_timer")) {
+    facing_stability_timer = 0;
+    facing_cooldown = 15; // Frames to wait before allowing facing change
+    last_facing_change = current_time;
+    facing_change_debounce = false;
+    facing_history = array_create(5, facing_right); // Track last 5 facing states
+}
+
+// Update facing history array (for debouncing)
+if (!variable_instance_exists(id, "facing_history_index")) {
+    facing_history_index = 0;
+}
+facing_history_index = (facing_history_index + 1) % array_length(facing_history);
+facing_history[facing_history_index] = facing_right;
+
+// Function to check if facing is stable (not flickering)
+var is_facing_stable = function() {
+    var all_same = true;
+    var first_value = facing_history[0];
+    for (var i = 1; i < array_length(facing_history); i++) {
+        if (facing_history[i] != first_value) {
+            all_same = false;
+            break;
+        }
+    }
+    return all_same;
+};
+
+// Update facing direction based on movement with stability protection
 // This is important for sprite flipping in the Draw event
 if (hspd != 0) {
-    // Set facing based on horizontal movement
-    // When moving right (positive hspd), face right
-    // When moving left (negative hspd), face left
-    facing_right = (hspd > 0);
+    // Calculate if we should change facing
+    var new_facing = (hspd > 0);
+    
+    // Special case: if extremely slow movement, maintain current facing
+    if (abs(hspd) < 0.08) {
+        // Skip facing update for very tiny movements
+        // This prevents flickering when slime is against a wall or in tight spaces
+        // Nothing to do here - keep current facing
+    } else {
+        // Only change facing if:
+        // 1. The new direction is different from current
+        // 2. The movement is significant enough
+        // 3. Enough time has passed since last change
+        if (new_facing != facing_right) {
+            // Check if we're still in cooldown
+            if (current_time - last_facing_change < facing_cooldown) {
+                // Still in cooldown, accumulate consistency
+                facing_stability_timer++;
+                
+                // Only change if consistent movement for extended period
+                if (facing_stability_timer >= 12) { // Increased for more stability
+                    // Prepare for facing change (debounce)
+                    facing_change_debounce = true;
+                }
+            } else {
+                // Cooldown expired, check if we should change
+                if (facing_change_debounce) {
+                    // If stable enough, make the change
+                    facing_right = new_facing;
+                    facing_change_debounce = false;
+                    facing_stability_timer = 0;
+                    last_facing_change = current_time;
+                    
+                    // Reset facing history
+                    for (var i = 0; i < array_length(facing_history); i++) {
+                        facing_history[i] = new_facing;
+                    }
+                } else {
+                    // Start debounce process
+                    facing_change_debounce = true;
+                    facing_stability_timer = 0;
+                }
+            }
+        } else {
+            // Moving in current facing direction, reinforce stability
+            facing_stability_timer = 0;
+            facing_change_debounce = false;
+        }
+    }
 } else if (vspd != 0 && state == "chase") {
     // Only update facing during vertical movement if actively chasing
     var player = instance_nearest(x, y, oPlayer);
     if (player != noone) {
-        // Face toward player's position
-        facing_right = (player.x > x);
+        // Face toward player's position, but with stability checks
+        var should_face_right = (player.x > x);
+        
+        // Only change if it's different and cooldown has passed
+        if (should_face_right != facing_right) {
+            if (current_time - last_facing_change >= facing_cooldown * 2) { // Double cooldown for vertical movement
+                // Update facing history to check stability
+                var all_same = true;
+                for (var i = 0; i < array_length(facing_history); i++) {
+                    if (facing_history[i] != facing_right) {
+                        all_same = false;
+                        break;
+                    }
+                }
+                
+                // Only change if previous facing was stable
+                if (all_same) {
+                    facing_right = should_face_right;
+                    last_facing_change = current_time;
+                    
+                    // Reset facing history
+                    for (var i = 0; i < array_length(facing_history); i++) {
+                        facing_history[i] = should_face_right;
+                    }
+                }
+            }
+        }
     }
 } else if (state == "wander" && move_dir != -1) {
-    // Update facing based on wander direction
+    // Update facing based on wander direction with stability
     // Right-side directions (between 270 and 90 degrees) should face right
-    facing_right = (move_dir < 90 || move_dir > 270);
+    var should_face_right = (move_dir < 90 || move_dir > 270);
+    
+    // Only change if it's different, cooldown has passed, and previous facing was stable
+    if (should_face_right != facing_right) {
+        if (current_time - last_facing_change >= facing_cooldown * 1.5) { // 1.5x cooldown for wandering
+            // Check if previous facing was stable
+            var all_same = true;
+            for (var i = 0; i < array_length(facing_history); i++) {
+                if (facing_history[i] != facing_right) {
+                    all_same = false;
+                    break;
+                }
+            }
+            
+            // Only change if previous facing was stable
+            if (all_same) {
+                facing_right = should_face_right;
+                last_facing_change = current_time;
+                
+                // Reset facing history
+                for (var i = 0; i < array_length(facing_history); i++) {
+                    facing_history[i] = should_face_right;
+                }
+            }
+        }
+    }
 }
 
 // Final safety check - prevent getting stuck inside walls
