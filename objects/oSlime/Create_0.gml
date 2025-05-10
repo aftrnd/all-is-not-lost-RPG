@@ -5,7 +5,7 @@
 spd = 0.3;               // Base movement speed (increased)
 chase_spd = .75;         // Speed when chasing player (increased significantly)
 detection_range = 100;   // Range to detect player
-chase_range = 75;        // Range to start chasing player directly
+chase_range = 75;        // Range to start chasing player directly (reduced from 75)
 avoid_range = 50;        // Range to avoid obstacles
 
 // Movement smoothing
@@ -36,17 +36,14 @@ path_prediction = true;              // Whether to predict player movement for b
 // Enhanced pathfinding variables
 last_known_target_x = -1;       // Last known player X position
 last_known_target_y = -1;       // Last known player Y position
-last_known_target_time = 0;     // When the player was last seen
-memory_duration = 5000;         // How long to remember player position (in milliseconds)
 path_max_length = 300;          // Maximum path length to consider
 search_attempts = 0;            // How many search attempts have been made
 max_search_attempts = 3;        // Maximum number of attempts before giving up
-using_memory = false;           // Whether currently using memory to find player
-lost_target_timer = 0;          // Timer for how long the target has been lost
-investigate_time = room_speed * 8; // How long to investigate the last known position
+seen_player = false;            // Whether the slime has seen the player
+going_to_last_seen = false;     // Whether the slime is currently going to the last seen position
 
 // State tracking
-state = "wander";         // Current state: "wander", "chase", "investigate"
+state = "wander";         // Current state: "wander" or "chase"
 wander_pause_timer = 0;   // Timer for pausing during wandering
 wander_pause_duration = 0; // Duration to pause 
 

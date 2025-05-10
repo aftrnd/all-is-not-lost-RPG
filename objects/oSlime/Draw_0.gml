@@ -57,16 +57,20 @@ if (debug_enabled) {
         dist_to_player = point_distance(x, y, player.x, player.y);
     }
     
-    // Detection range circle
+    // Detection range circle (outer - yellow)
     draw_set_color(c_yellow);
-    draw_set_alpha(0.3);
+    draw_set_alpha(0.15);
     draw_circle(x, y, detection_range, false); // Filled semi-transparent circle
-    draw_set_alpha(1.0);
+    draw_set_alpha(0.8);
     draw_circle(x, y, detection_range, true);  // Outline
     
-    // Chase range
+    // Chase range (inner - orange-red)
+    draw_set_color(c_orange);
+    draw_set_alpha(0.25);
+    draw_circle(x, y, chase_range, false); // Filled semi-transparent circle
+    draw_set_alpha(0.9);
     draw_set_color(c_red);
-    draw_circle(x, y, chase_range, true);
+    draw_circle(x, y, chase_range, true); // Outline
     
     // Draw line to player if in range
     if (player != noone && dist_to_player <= detection_range) {
@@ -137,38 +141,61 @@ if (debug_enabled) {
         draw_text(x + 15, y - 36, "Path: " + string(path_points) + " pts");
     }
     
-    // Current state and distance info
-    draw_set_color(c_white);
-    draw_text(x, y - 24, state);
-    if (player != noone) {
-        draw_text(x, y - 12, "Dist: " + string(floor(dist_to_player)) + "px");
+    // Draw last known position marker if it exists
+    if (variable_instance_exists(id, "last_known_target_x") && 
+        variable_instance_exists(id, "last_known_target_y") &&
+        last_known_target_x != -1 && last_known_target_y != -1 &&
+        seen_player) {
+        
+        // X marks the spot
+        var lkx = last_known_target_x;
+        var lky = last_known_target_y;
+        
+        // Different color depending on whether we're currently going to that position
+        if (going_to_last_seen) {
+            draw_set_color(c_orange);
+            draw_set_alpha(0.9);
+        } else {
+            draw_set_color(c_gray);
+            draw_set_alpha(0.6);
+        }
+        
+        // Draw X marker
+        var marker_size = 6;
+        draw_line_width(lkx - marker_size, lky - marker_size, 
+                       lkx + marker_size, lky + marker_size, 2);
+        draw_line_width(lkx + marker_size, lky - marker_size, 
+                       lkx - marker_size, lky + marker_size, 2);
+                       
+        // Draw circle around last known position
+        draw_circle(lkx, lky, 10, true);
+        
+        // Draw line from slime to last known position if actively going there
+        if (going_to_last_seen) {
+            draw_line_width(x, y, lkx, lky, 1);
+            
+            // Add a text label
+            draw_set_color(c_orange);
+            draw_text(lkx + 15, lky - 10, "Last seen");
+        }
     }
     
-    // Draw memory status if applicable
-    if (using_memory) {
+    // Draw current state name with different colors
+    draw_set_color(c_white);
+    if (state == "chase") {
+        draw_set_color(c_lime);
+    } else if (state == "wander" && going_to_last_seen) {
         draw_set_color(c_orange);
-        draw_text(x, y - 36, "Memory: " + string(floor((memory_duration - (current_time - last_known_target_time)) / 1000)) + "s");
-        
-        // Draw last known position marker
-        if (variable_instance_exists(id, "last_known_target_x") && 
-            variable_instance_exists(id, "last_known_target_y")) {
-            // X marks the spot
-            var lkx = last_known_target_x;
-            var lky = last_known_target_y;
-            
-            draw_set_color(c_orange);
-            draw_set_alpha(0.8);
-            
-            // Draw X marker
-            var marker_size = 6;
-            draw_line_width(lkx - marker_size, lky - marker_size, 
-                           lkx + marker_size, lky + marker_size, 2);
-            draw_line_width(lkx + marker_size, lky - marker_size, 
-                           lkx - marker_size, lky + marker_size, 2);
-                           
-            // Draw circle around last known position
-            draw_circle(lkx, lky, 10, true);
-        }
+        draw_text(x, y - 24, "going_to_last_seen");
+    } else {
+        draw_set_color(c_white);
+    }
+    draw_text(x, y - 36, state);
+    
+    // Distance info
+    if (player != noone) {
+        draw_set_color(c_white);
+        draw_text(x, y - 12, "Dist: " + string(floor(dist_to_player)) + "px");
     }
     
     // Draw direction indicator

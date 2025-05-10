@@ -16,11 +16,7 @@ if (player != noone) {
     // Update memory of player's position if visible
     if (can_see_player) {
         mob_pathfinding_set_last_known_position(player.x, player.y);
-        lost_target_timer = 0;
-        using_memory = false;
-    } else if (state == "chase") {
-        // If we lost sight of the player while chasing
-        lost_target_timer++;
+        seen_player = true; // Mark that we've seen the player
     }
 }
 
@@ -34,8 +30,8 @@ prev_vspd = vspd;
 
 // STATE MANAGEMENT - Determine current state
 if (player != noone) {
-    if (can_see_player && dist_to_player <= detection_range) {
-        // Player is visible and within detection range - enter chase state
+    if (can_see_player && dist_to_player <= chase_range) {
+        // Player is visible and within chase range - enter chase state
         if (state != "chase") {
             // Debug message for detection
             if (variable_global_exists("debug_mode") && global.debug_mode) {
@@ -51,37 +47,19 @@ if (player != noone) {
         }
         
         state = "chase";
+        going_to_last_seen = false; // Reset this flag when actively chasing
     } else if (state == "chase") {
-        // Check if we should switch to investigate state (player not visible anymore)
-        if (!can_see_player) {
-            if (mob_pathfinding_memory_is_valid(memory_duration)) {
-                // Still remember where player was - continue chasing but use memory
-                using_memory = true;
-            } else if (lost_target_timer >= investigate_time) {
-                // Too much time has passed since seeing player - return to wandering
+        // Check if player is now outside chase range or not visible
+        if (!can_see_player || dist_to_player > chase_range) {
+            // If player just went out of sight and we saw them before
+            if (!can_see_player && seen_player && last_known_target_x != -1) {
+                // Go to last known position
                 state = "wander";
-                // Reset wandering parameters
-                change_dir_timer = 0;
-                move_dir = irandom(359);
+                going_to_last_seen = true;
                 
-                // Debug message for losing player completely
+                // Debug message
                 if (variable_global_exists("debug_mode") && global.debug_mode) {
-                    var debug_msg = "Slime gave up searching for player";
-                    show_debug_message(debug_msg);
-                    
-                    // Use player's debug log if available
-                    var player_obj = instance_find(oPlayer, 0);
-                    if (player_obj != noone && variable_instance_exists(player_obj, "debug_log")) {
-                        player_obj.debug_log(debug_msg, c_gray);
-                    }
-                }
-            } else if (state != "investigate") {
-                // Switch to investigate state
-                state = "investigate";
-                
-                // Debug message for starting to investigate
-                if (variable_global_exists("debug_mode") && global.debug_mode) {
-                    var debug_msg = "Slime investigating last known player position";
+                    var debug_msg = "Slime lost sight of player - heading to last known position";
                     show_debug_message(debug_msg);
                     
                     // Use player's debug log if available
@@ -90,22 +68,40 @@ if (player != noone) {
                         player_obj.debug_log(debug_msg, c_orange);
                     }
                 }
+            } else {
+                // Just switch back to normal wandering
+                state = "wander";
+                going_to_last_seen = false;
+                // Reset wandering parameters
+                change_dir_timer = 0;
+                move_dir = irandom(359);
+                
+                // Debug message for player moving out of range
+                if (variable_global_exists("debug_mode") && global.debug_mode) {
+                    var debug_msg = !can_see_player ? 
+                                   "Slime lost sight of player and returned to wandering" : 
+                                   "Player moved out of chase range, slime returned to wandering";
+                    show_debug_message(debug_msg);
+                    
+                    // Use player's debug log if available
+                    var player_obj = instance_find(oPlayer, 0);
+                    if (player_obj != noone && variable_instance_exists(player_obj, "debug_log")) {
+                        player_obj.debug_log(debug_msg, c_gray);
+                    }
+                }
             }
-        } else {
-            // Player is visible again, reset lost target timer
-            lost_target_timer = 0;
         }
     }
 }
 
 // STATE BEHAVIOR - Act based on current state
 if (state == "chase") {
-    // CHASE STATE - Player is detected or remembered
+    // CHASE STATE - Player is detected
     
-    // Determine target position based on whether player is visible
-    var target_x, target_y;
-    
+    // Direct targeting only when player is visible
     if (can_see_player) {
+        var target_x, target_y;
+        
         // If we can predict player movement and they're moving fast enough, aim ahead of them
         if (path_prediction && instance_exists(player) && 
             (abs(player.hspd) > 0.5 || abs(player.vspd) > 0.5)) {
@@ -125,81 +121,195 @@ if (state == "chase") {
             target_x = player.x;
             target_y = player.y;
         }
-    } else {
-        target_x = last_known_target_x;
-        target_y = last_known_target_y;
-    }
-    
-    if (dist_to_player <= chase_range && can_see_player) {
-        // DIRECT CHASE - Player is very close and visible, move directly toward them
-        var dir_to_player = point_direction(x, y, player.x, player.y);
         
-        // Use full chase speed when close to player
-        // Only scale down when extremely close (< 5 pixels)
-        var chase_factor = 1.0;
-        if (dist_to_player < 5) {
-            chase_factor = dist_to_player / 5;
-        }
+        // Check for obstacles between slime and player
+        var has_clear_path = !collision_line(x, y, target_x, target_y, oUtilityWall, false, true);
         
-        // Clear any active path when doing direct chase to avoid conflicts
-        if (path_get_number(path) > 0) {
-            path_clear_points(path);
-        }
-        
-        var raw_hspd = lengthdir_x(chase_spd * chase_factor, dir_to_player);
-        var raw_vspd = lengthdir_y(chase_spd * chase_factor, dir_to_player);
-        
-        // Apply smoothing if enabled
-        if (movement_smoothing) {
-            hspd = raw_hspd * direct_smooth_factor + prev_hspd * (1 - direct_smooth_factor);
-            vspd = raw_vspd * direct_smooth_factor + prev_vspd * (1 - direct_smooth_factor);
+        // Use direct movement only when very close AND with a clear path
+        if (dist_to_player <= chase_range && has_clear_path) {
+            // DIRECT CHASE - Player is very close and directly visible (no obstacles)
+            var dir_to_player = point_direction(x, y, player.x, player.y);
+            
+            // Use full chase speed when close to player
+            // Only scale down when extremely close (< 5 pixels)
+            var chase_factor = 1.0;
+            if (dist_to_player < 5) {
+                chase_factor = dist_to_player / 5;
+            }
+            
+            // Clear any active path when doing direct chase to avoid conflicts
+            if (path_get_number(path) > 0) {
+                path_clear_points(path);
+            }
+            
+            var raw_hspd = lengthdir_x(chase_spd * chase_factor, dir_to_player);
+            var raw_vspd = lengthdir_y(chase_spd * chase_factor, dir_to_player);
+            
+            // Apply smoothing if enabled
+            if (movement_smoothing) {
+                hspd = raw_hspd * direct_smooth_factor + prev_hspd * (1 - direct_smooth_factor);
+                vspd = raw_vspd * direct_smooth_factor + prev_vspd * (1 - direct_smooth_factor);
+            } else {
+                hspd = raw_hspd;
+                vspd = raw_vspd;
+            }
+            
+            // Debug message
+            if (variable_global_exists("debug_mode") && global.debug_mode) {
+                show_debug_message("Slime using direct movement to player");
+            }
         } else {
-            hspd = raw_hspd;
-            vspd = raw_vspd;
+            // A* PATHFINDING CHASE - Player is either further away or there are obstacles
+            
+            // Update path less frequently to save performance
+            path_update_timer++;
+            if (path_update_timer >= path_update_delay) {
+                path_update_timer = 0;
+                search_attempts = 0;
+                
+                // Find path to target using our pathfinding function
+                var path_found = mob_pathfinding_find_path(path, x, y, target_x, target_y, path_max_length);
+                
+                // Debug message for pathfinding result
+                if (variable_global_exists("debug_mode") && global.debug_mode) {
+                    show_debug_message("Slime pathfinding result: " + (path_found ? "Path found" : "No path found"));
+                }
+                
+                // Simplify path if that option is enabled
+                if (path_point_simplification && path_get_number(path) > 3) {
+                    // Simple path simplification - remove points in a straight line
+                    var i = 1;
+                    while (i < path_get_number(path) - 1) {
+                        var px1 = path_get_point_x(path, i-1);
+                        var py1 = path_get_point_y(path, i-1);
+                        var px2 = path_get_point_x(path, i);
+                        var py2 = path_get_point_y(path, i);
+                        var px3 = path_get_point_x(path, i+1);
+                        var py3 = path_get_point_y(path, i+1);
+                        
+                        // Calculate angles between segments
+                        var angle1 = point_direction(px1, py1, px2, py2);
+                        var angle2 = point_direction(px2, py2, px3, py3);
+                        
+                        // If the angles are similar (within 5 degrees), this point is unnecessary
+                        if (abs(angle_difference(angle1, angle2)) < 5) {
+                            // This point is in a straight line, remove it
+                            path_delete_point(path, i);
+                        } else {
+                            i++; // Only increment if we didn't remove a point
+                        }
+                    }
+                }
+            }
+            
+            // Check if we have a valid path
+            if (path_get_number(path) > 1) {
+                // Get movement vector from pathfinding helper
+                var move_data = mob_pathfinding_follow_path(path, chase_spd, 0);
+                
+                // Apply smoothing if enabled
+                if (movement_smoothing) {
+                    hspd = move_data.hspd * path_smooth_factor + prev_hspd * (1 - path_smooth_factor);
+                    vspd = move_data.vspd * path_smooth_factor + prev_vspd * (1 - path_smooth_factor);
+                } else {
+                    hspd = move_data.hspd;
+                    vspd = move_data.vspd;
+                }
+            } else {
+                // No valid path found, try alternative methods
+                search_attempts++;
+                
+                if (search_attempts < max_search_attempts) {
+                    // Try again with different parameters
+                    mob_pathfinding_find_path(path, x, y, target_x, target_y, path_max_length);
+                } else {
+                    // Only use fallback if pathfinding completely fails after multiple attempts
+                    var dir_to_target = point_direction(x, y, target_x, target_y);
+                    
+                    // Check for walls in our direct path before choosing obstacle avoidance
+                    var wall_ahead = collision_line(x, y, 
+                                                 x + lengthdir_x(avoid_range, dir_to_target), 
+                                                 y + lengthdir_y(avoid_range, dir_to_target), 
+                                                 oUtilityWall, false, true);
+                    
+                    if (wall_ahead) {
+                        // Wall in the way, try to find a clear direction
+                        var test_angles = [45, -45, 90, -90, 135, -135];
+                        var found_clear_path = false;
+                        
+                        for (var i = 0; i < array_length(test_angles); i++) {
+                            var test_dir = dir_to_target + test_angles[i];
+                            var test_x = x + lengthdir_x(avoid_range, test_dir);
+                            var test_y = y + lengthdir_y(avoid_range, test_dir);
+                            
+                            if (!collision_line(x, y, test_x, test_y, oUtilityWall, false, true)) {
+                                // Found a clear direction, use it
+                                dir_to_target = test_dir;
+                                found_clear_path = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!found_clear_path) {
+                            // No clear path found, just pick a random direction
+                            dir_to_target = irandom(359);
+                        }
+                    }
+                    
+                    // Debug message for fallback movement
+                    if (variable_global_exists("debug_mode") && global.debug_mode) {
+                        show_debug_message("Slime using fallback movement");
+                    }
+                    
+                    // Apply fallback movement with stronger smoothing for more natural movement
+                    var raw_hspd = lengthdir_x(chase_spd * 0.8, dir_to_target); // Slightly slower
+                    var raw_vspd = lengthdir_y(chase_spd * 0.8, dir_to_target);
+                    
+                    if (movement_smoothing) {
+                        hspd = raw_hspd * fallback_smooth_factor + prev_hspd * (1 - fallback_smooth_factor);
+                        vspd = raw_vspd * fallback_smooth_factor + prev_vspd * (1 - fallback_smooth_factor);
+                    } else {
+                        hspd = raw_hspd;
+                        vspd = raw_vspd;
+                    }
+                }
+            }
         }
     } else {
-        // A* PATHFINDING CHASE - Player is further away or not visible
+        // Lost sight of player, switch to wandering
+        state = "wander";
+        going_to_last_seen = true; // Go to last known position
         
-        // Update path less frequently to save performance
+        // Debug message
+        if (variable_global_exists("debug_mode") && global.debug_mode) {
+            var debug_msg = "Slime lost sight of player - heading to last known position";
+            show_debug_message(debug_msg);
+        }
+    }
+} else if (state == "wander") {
+    // WANDER STATE - Either random wandering or going to last seen position
+    
+    // If we're going to the last known player position
+    if (going_to_last_seen && last_known_target_x != -1 && last_known_target_y != -1) {
+        // Use A* pathfinding to go to the last known position
         path_update_timer++;
-        if (path_update_timer >= path_update_delay) {
+        
+        if (path_update_timer >= path_update_delay || path_get_number(path) <= 1) {
             path_update_timer = 0;
             search_attempts = 0;
             
-            // Find path to target using our pathfinding function
-            mob_pathfinding_find_path(path, x, y, target_x, target_y, path_max_length);
+            // Try to find a path to the last known position
+            var path_found = mob_pathfinding_find_path(path, x, y, last_known_target_x, last_known_target_y, path_max_length);
             
-            // Simplify path if that option is enabled
-            if (path_point_simplification && path_get_number(path) > 3) {
-                // Simple path simplification - remove points in a straight line
-                var i = 1;
-                while (i < path_get_number(path) - 1) {
-                    var px1 = path_get_point_x(path, i-1);
-                    var py1 = path_get_point_y(path, i-1);
-                    var px2 = path_get_point_x(path, i);
-                    var py2 = path_get_point_y(path, i);
-                    var px3 = path_get_point_x(path, i+1);
-                    var py3 = path_get_point_y(path, i+1);
-                    
-                    // Calculate angles between segments
-                    var angle1 = point_direction(px1, py1, px2, py2);
-                    var angle2 = point_direction(px2, py2, px3, py3);
-                    
-                    // If the angles are similar (within 5 degrees), this point is unnecessary
-                    if (abs(angle_difference(angle1, angle2)) < 5) {
-                        // This point is in a straight line, remove it
-                        path_delete_point(path, i);
-                    } else {
-                        i++; // Only increment if we didn't remove a point
-                    }
-                }
+            if (variable_global_exists("debug_mode") && global.debug_mode) {
+                show_debug_message("Finding path to last known position: " + (path_found ? "Success" : "Failed"));
             }
         }
         
         // Check if we have a valid path
         if (path_get_number(path) > 1) {
             // Get movement vector from pathfinding helper
-            var move_data = mob_pathfinding_follow_path(path, chase_spd, 0);
+            var move_data = mob_pathfinding_follow_path(path, spd * 1.25, 0); // Slightly faster than normal wander
             
             // Apply smoothing if enabled
             if (movement_smoothing) {
@@ -210,238 +320,118 @@ if (state == "chase") {
                 vspd = move_data.vspd;
             }
             
-            // If we reached the end of our path and were using memory
-            if (move_data.reached_end && using_memory) {
-                // If we've reached the last known position and player isn't there
-                if (!can_see_player) {
-                    // Start a wider search by invalidating memory
-                    lost_target_timer = investigate_time;
-                }
-            }
-        } else {
-            // No valid path found, try alternative methods
-            search_attempts++;
+            // Check if we've reached the destination (or close enough)
+            var dist_to_last_known = point_distance(x, y, last_known_target_x, last_known_target_y);
             
-            if (search_attempts < max_search_attempts) {
-                // Try again with different parameters
-                mob_pathfinding_find_path(path, x, y, target_x, target_y, path_max_length);
-            } else {
-                // Only use fallback if pathfinding completely fails after multiple attempts
-                var dir_to_target = point_direction(x, y, target_x, target_y);
+            if (dist_to_last_known < 10 || move_data.reached_end) {
+                // We've reached the last known position, resume normal wandering
+                going_to_last_seen = false;
+                change_dir_timer = 0; 
+                move_dir = irandom(359);
                 
-                // Check for walls in our direct path before choosing obstacle avoidance
-                var wall_ahead = collision_line(x, y, 
-                                             x + lengthdir_x(avoid_range, dir_to_target), 
-                                             y + lengthdir_y(avoid_range, dir_to_target), 
-                                             oUtilityWall, false, true);
-                
-                if (wall_ahead) {
-                    // Wall in the way, try to find a clear direction
-                    var test_angles = [45, -45, 90, -90, 135, -135];
-                    var found_clear_path = false;
+                // Debug message
+                if (variable_global_exists("debug_mode") && global.debug_mode) {
+                    var debug_msg = "Slime reached last known player position - resuming wandering";
+                    show_debug_message(debug_msg);
                     
-                    for (var i = 0; i < array_length(test_angles); i++) {
-                        var test_dir = dir_to_target + test_angles[i];
-                        var test_x = x + lengthdir_x(avoid_range, test_dir);
-                        var test_y = y + lengthdir_y(avoid_range, test_dir);
-                        
-                        if (!collision_line(x, y, test_x, test_y, oUtilityWall, false, true)) {
-                            // Found a clear direction, use it
-                            dir_to_target = test_dir;
-                            found_clear_path = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!found_clear_path) {
-                        // No clear path found, just pick a random direction
-                        dir_to_target = irandom(359);
+                    // Use player's debug log if available
+                    var player_obj = instance_find(oPlayer, 0);
+                    if (player_obj != noone && variable_instance_exists(player_obj, "debug_log")) {
+                        player_obj.debug_log(debug_msg, c_gray);
                     }
                 }
-                
-                // Apply fallback movement with stronger smoothing for more natural movement
-                var raw_hspd = lengthdir_x(chase_spd * 0.8, dir_to_target); // Slightly slower
-                var raw_vspd = lengthdir_y(chase_spd * 0.8, dir_to_target);
-                
-                if (movement_smoothing) {
-                    hspd = raw_hspd * fallback_smooth_factor + prev_hspd * (1 - fallback_smooth_factor);
-                    vspd = raw_vspd * fallback_smooth_factor + prev_vspd * (1 - fallback_smooth_factor);
-                } else {
-                    hspd = raw_hspd;
-                    vspd = raw_vspd;
-                }
-            }
-        }
-    }
-} else if (state == "investigate") {
-    // INVESTIGATE STATE - Player was seen but now is hidden
-    
-    // Move to the last known position of the player
-    var target_x = last_known_target_x;
-    var target_y = last_known_target_y;
-    var dist_to_target = point_distance(x, y, target_x, target_y);
-    
-    // Check if we've reached the investigation point (or close enough)
-    if (dist_to_target < 10) {
-        // We've reached the last known position, continue searching for a bit
-        lost_target_timer += 2; // Accelerate the timer when we're at the spot
-        
-        // Randomly look around
-        if (irandom(100) < 15) { // 15% chance to change direction
-            move_dir = irandom(359);
-        }
-        
-        // Move slowly in random directions with some smoothing
-        var raw_hspd = lengthdir_x(spd * 0.5, move_dir);
-        var raw_vspd = lengthdir_y(spd * 0.5, move_dir);
-        
-        // Apply light smoothing for more responsive turns
-        if (movement_smoothing) {
-            var search_smoothing = 0.9; // High value for more responsive turns
-            hspd = raw_hspd * search_smoothing + prev_hspd * (1 - search_smoothing);
-            vspd = raw_vspd * search_smoothing + prev_vspd * (1 - search_smoothing);
-        } else {
-            hspd = raw_hspd;
-            vspd = raw_vspd;
-        }
-    } else {
-        // Use pathfinding to reach the last known position
-        path_update_timer++;
-        if (path_update_timer >= path_update_delay) {
-            path_update_timer = 0;
-            
-            // Find path to last known position
-            mob_pathfinding_find_path(path, x, y, target_x, target_y, path_max_length);
-        }
-        
-        // Follow the path if one exists
-        if (path_get_number(path) > 1) {
-            var move_data = mob_pathfinding_follow_path(path, chase_spd * 0.75, 0);
-            
-            // Apply smoothing for path following
-            if (movement_smoothing) {
-                hspd = move_data.hspd * path_smooth_factor + prev_hspd * (1 - path_smooth_factor);
-                vspd = move_data.vspd * path_smooth_factor + prev_vspd * (1 - path_smooth_factor);
-            } else {
-                hspd = move_data.hspd;
-                vspd = move_data.vspd;
             }
         } else {
-            // Direct path if no valid path found
-            var dir_to_target = point_direction(x, y, target_x, target_y);
-            var raw_hspd = lengthdir_x(chase_spd * 0.75, dir_to_target);
-            var raw_vspd = lengthdir_y(chase_spd * 0.75, dir_to_target);
-            
-            // Apply smoothing for direct movement
-            if (movement_smoothing) {
-                var direct_smoothing = 0.7;
-                hspd = raw_hspd * direct_smoothing + prev_hspd * (1 - direct_smoothing);
-                vspd = raw_vspd * direct_smoothing + prev_vspd * (1 - direct_smoothing);
-            } else {
-                hspd = raw_hspd;
-                vspd = raw_vspd;
-            }
-        }
-    }
-    
-    // Check if investigate time has expired
-    if (lost_target_timer >= investigate_time) {
-        // Switch back to wandering
-        state = "wander";
-        change_dir_timer = 0;
-        move_dir = irandom(359);
-        
-        // Debug message
-        if (variable_global_exists("debug_mode") && global.debug_mode) {
-            var debug_msg = "Slime gave up searching and returned to wandering";
-            show_debug_message(debug_msg);
-            
-            // Use player's debug log if available
-            var player_obj = instance_find(oPlayer, 0);
-            if (player_obj != noone && variable_instance_exists(player_obj, "debug_log")) {
-                player_obj.debug_log(debug_msg, c_gray);
-            }
-        }
-    }
-} else if (state == "wander") {
-    // WANDER STATE - Moving randomly around the area
-    
-    // Check if we're in a paused state
-    if (wander_pause_timer > 0) {
-        // Currently paused
-        wander_pause_timer--;
-        
-        // When pause ends, choose a new direction
-        if (wander_pause_timer <= 0) {
-            move_dir = irandom(359);
+            // No valid path found, revert to normal wandering
+            going_to_last_seen = false;
             change_dir_timer = 0;
+            move_dir = irandom(359);
+            
+            // Debug message
+            if (variable_global_exists("debug_mode") && global.debug_mode) {
+                var debug_msg = "Slime couldn't find path to last known position - resuming wandering";
+                show_debug_message(debug_msg);
+            }
         }
     } else {
-        // Active wandering
-        
-        // Increment timer for changing direction
-        change_dir_timer++;
-        
-        if (change_dir_timer >= change_dir_delay) {
-            // Time to change direction or possibly pause
+        // Normal wandering behavior
+        // Check if we're in a paused state
+        if (wander_pause_timer > 0) {
+            // Currently paused
+            wander_pause_timer--;
             
-            // 30% chance to pause briefly during wandering
-            if (irandom(100) < 30) {
-                // Pause for a random duration (0.5 to 2 seconds)
-                wander_pause_timer = irandom_range(room_speed * 0.5, room_speed * 2);
-                wander_pause_duration = wander_pause_timer;
-                
-                // Clear movement
-                hspd = 0;
-                vspd = 0;
-            } else {
-                // Change to a new direction
+            // When pause ends, choose a new direction
+            if (wander_pause_timer <= 0) {
                 move_dir = irandom(359);
                 change_dir_timer = 0;
-                change_dir_delay = room_speed * irandom_range(1, 3); // Randomize next delay
             }
-        }
-        
-        // Only calculate movement if not paused
-        if (wander_pause_timer <= 0) {
-            // Calculate movement based on current direction
-            var raw_hspd = lengthdir_x(spd, move_dir);
-            var raw_vspd = lengthdir_y(spd, move_dir);
+        } else {
+            // Active wandering
             
-            // Apply smoothing for wander movement
-            if (movement_smoothing) {
-                var wander_smoothing = 0.3; // Low value for very smooth wandering
-                hspd = raw_hspd * wander_smoothing + prev_hspd * (1 - wander_smoothing);
-                vspd = raw_vspd * wander_smoothing + prev_vspd * (1 - wander_smoothing);
-            } else {
-                hspd = raw_hspd;
-                vspd = raw_vspd;
+            // Increment timer for changing direction
+            change_dir_timer++;
+            
+            if (change_dir_timer >= change_dir_delay) {
+                // Time to change direction or possibly pause
+                
+                // 30% chance to pause briefly during wandering
+                if (irandom(100) < 30) {
+                    // Pause for a random duration (0.5 to 2 seconds)
+                    wander_pause_timer = irandom_range(room_speed * 0.5, room_speed * 2);
+                    wander_pause_duration = wander_pause_timer;
+                    
+                    // Clear movement
+                    hspd = 0;
+                    vspd = 0;
+                } else {
+                    // Change to a new direction
+                    move_dir = irandom(359);
+                    change_dir_timer = 0;
+                    change_dir_delay = room_speed * irandom_range(1, 3); // Randomize next delay
+                }
             }
             
-            // Check for collision in the movement direction
-            var will_hit_wall = collision_line(x, y, x + hspd * avoid_range, y + vspd * avoid_range, 
-                                              oUtilityWall, false, true);
-            
-            if (will_hit_wall) {
-                // About to hit a wall, change direction to bounce off
-                move_dir = (move_dir + 180 + irandom_range(-45, 45)) % 360;
+            // Only calculate movement if not paused
+            if (wander_pause_timer <= 0) {
+                // Calculate movement based on current direction
+                var raw_hspd = lengthdir_x(spd, move_dir);
+                var raw_vspd = lengthdir_y(spd, move_dir);
                 
-                // Recalculate movement with the new direction
-                raw_hspd = lengthdir_x(spd, move_dir);
-                raw_vspd = lengthdir_y(spd, move_dir);
-                
-                // Apply sharper turn for obstacles (more responsive)
+                // Apply smoothing for wander movement
                 if (movement_smoothing) {
-                    var bounce_smoothing = 0.6; // Higher value for more responsive obstacle avoidance
-                    hspd = raw_hspd * bounce_smoothing + prev_hspd * (1 - bounce_smoothing);
-                    vspd = raw_vspd * bounce_smoothing + prev_vspd * (1 - bounce_smoothing);
+                    var wander_smoothing = 0.3; // Low value for very smooth wandering
+                    hspd = raw_hspd * wander_smoothing + prev_hspd * (1 - wander_smoothing);
+                    vspd = raw_vspd * wander_smoothing + prev_vspd * (1 - wander_smoothing);
                 } else {
                     hspd = raw_hspd;
                     vspd = raw_vspd;
                 }
                 
-                // Reset direction change timer
-                change_dir_timer = 0;
+                // Check for collision in the movement direction
+                var will_hit_wall = collision_line(x, y, x + hspd * avoid_range, y + vspd * avoid_range, 
+                                                  oUtilityWall, false, true);
+                
+                if (will_hit_wall) {
+                    // About to hit a wall, change direction to bounce off
+                    move_dir = (move_dir + 180 + irandom_range(-45, 45)) % 360;
+                    
+                    // Recalculate movement with the new direction
+                    raw_hspd = lengthdir_x(spd, move_dir);
+                    raw_vspd = lengthdir_y(spd, move_dir);
+                    
+                    // Apply sharper turn for obstacles (more responsive)
+                    if (movement_smoothing) {
+                        var bounce_smoothing = 0.6; // Higher value for more responsive obstacle avoidance
+                        hspd = raw_hspd * bounce_smoothing + prev_hspd * (1 - bounce_smoothing);
+                        vspd = raw_vspd * bounce_smoothing + prev_vspd * (1 - bounce_smoothing);
+                    } else {
+                        hspd = raw_hspd;
+                        vspd = raw_vspd;
+                    }
+                    
+                    // Reset direction change timer
+                    change_dir_timer = 0;
+                }
             }
         }
     }
@@ -516,8 +506,8 @@ if (hspd != 0) {
     // When moving right (positive hspd), face right
     // When moving left (negative hspd), face left
     facing_right = (hspd > 0);
-} else if (vspd != 0 && (state == "chase" || state == "investigate")) {
-    // Only update facing during vertical movement if actively chasing/investigating
+} else if (vspd != 0 && state == "chase") {
+    // Only update facing during vertical movement if actively chasing
     var player = instance_nearest(x, y, oPlayer);
     if (player != noone) {
         // Face toward player's position
