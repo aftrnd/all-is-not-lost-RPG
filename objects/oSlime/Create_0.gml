@@ -4,8 +4,8 @@
 // Movement properties
 spd = 0.3;               // Base movement speed (increased)
 chase_spd = .75;         // Speed when chasing player (increased significantly)
-detection_range = 100;   // Range to detect player
-chase_range = 75;        // Range to start chasing player directly (reduced from 75)
+detection_range = 125;   // Range to detect player
+chase_range = 100;        // Range to start chasing player directly (reduced from 75)
 avoid_range = 50;        // Range to avoid obstacles
 
 // Movement smoothing
